@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 object STATIC {
     val LOGGER: Logger = LoggerFactory.getLogger("App")
-    val CONFIGS = configurations()
+    val CONFIGS = readConfigurations()
 }
 
 /** INF classes and instances *************************************************/
@@ -16,6 +16,22 @@ object STATIC {
 enum class Config {
     GMAIL_APP_NAME,
     AUTH_JSON
+}
+
+fun jsonFactory(): JacksonFactory {
+    return JacksonFactory.getDefaultInstance()
+}
+
+private fun environmentConfiguration(): EnvironmentConfiguration {
+    return EnvironmentConfiguration()
+}
+
+fun readConfigurations(): Map<Config, String> {
+    val parametersFromEnv = getParametersFromEnv()
+    parametersFromEnv.forEach{(k, _) ->
+        STATIC.LOGGER.info("Using configuration from ENV for $k")
+    }
+    return parametersFromEnv
 }
 
 private fun getParametersFromEnv(): Map<Config, String> {
@@ -33,26 +49,14 @@ private fun getParameterFromEnv(env: EnvironmentConfiguration, config: Config): 
     return env.map[config.name.toLowerCase()] as String?
 }
 
-private fun environmentConfiguration(): EnvironmentConfiguration {
-    return EnvironmentConfiguration()
-}
-
-private fun configurations(): Map<Config, String> {
-    val parametersFromEnv = getParametersFromEnv()
-    parametersFromEnv.forEach{(k, _) ->
-        STATIC.LOGGER.info("Using configuration from ENV for $k")
-    }
-    return parametersFromEnv
-}
-
-fun jsonFactory(): JacksonFactory {
-    return JacksonFactory.getDefaultInstance()
-}
-
-fun main() {
+fun readLines() {
     val drive = GoogleSheetClient(STATIC.CONFIGS)
     val lines = drive.listValues()
     lines.forEach{
         STATIC.LOGGER.info("line: {}", it)
     }
+}
+
+fun main() {
+    readLines()
 }
