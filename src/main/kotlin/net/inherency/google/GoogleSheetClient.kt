@@ -2,16 +2,18 @@ package net.inherency.google
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.SheetsScopes
 import net.inherency.Config
-import net.inherency.jsonFactory
+import net.inherency.Configurations
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
 
+@Service
 class GoogleSheetClient(
-        private val configs: Map<Config, String>,
-        @Value("\${google.sheet_id}") private val googleSheetId: String) {
+        private val configs: Configurations,
+        private val jsonFactory: JacksonFactory) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -19,7 +21,7 @@ class GoogleSheetClient(
         val range = "Transactions!A1:B"
         val response = login()
                 .spreadsheets()
-                .values()[googleSheetId, range]
+                .values()[googleSheetId(), range]
                 .execute()
         return response.values
     }
@@ -34,7 +36,7 @@ class GoogleSheetClient(
 
             return Sheets.Builder(
                     GoogleNetHttpTransport.newTrustedTransport(),
-                    jsonFactory(),
+                    jsonFactory,
                     credential)
                     .setApplicationName(googleApplicationName())
                     .build()
@@ -52,8 +54,12 @@ class GoogleSheetClient(
         return getConfig(Config.GMAIL_APP_NAME)
     }
 
+    private fun googleSheetId(): String {
+        return getConfig(Config.GOOGLE_SHEET_ID)
+    }
+
     private fun getConfig(config: Config): String {
-        return configs[config] ?: error("Could not find $config")
+        return configs.get(config) ?: error("Could not find $config")
     }
 
     private fun googleSheetScopes(): List<String> {

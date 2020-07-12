@@ -5,11 +5,18 @@ import net.inherency.google.GoogleSheetClient
 import org.apache.commons.configuration.EnvironmentConfiguration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
 import java.io.File
 
 object STATIC {
     val LOGGER: Logger = LoggerFactory.getLogger("App")
-    val CONFIGS = readConfigurations()
+    var CONFIGS = readConfigurationsEnvHasPriorityOverApplicationYmlFile()
+}
+
+fun main() {
+    STATIC.LOGGER.info("Running locally without Spring Boot")
+    readLinesNonSpringBoot()
 }
 
 /** INF classes and instances *************************************************/
@@ -20,29 +27,61 @@ enum class Config {
     GOOGLE_SHEET_ID
 }
 
+enum class ConfigSource {
+    ENV,
+    PROP
+}
+
+private data class ConfigValue(
+        val configSource: ConfigSource,
+        val configKey: Config,
+        val configValue: String
+)
+
 fun jsonFactory(): JacksonFactory {
     return JacksonFactory.getDefaultInstance()
+}
+
+@Service
+class Configurations {
+    fun get(configKey: Config): String? {
+        return STATIC.CONFIGS[configKey]
+    }
 }
 
 private fun environmentConfiguration(): EnvironmentConfiguration {
     return EnvironmentConfiguration()
 }
 
-fun readConfigurations(): Map<Config, String> {
+private fun readConfigurationsEnvHasPriorityOverApplicationYmlFile(): Map<Config, String> {
     val parametersFromEnv = getParametersFromEnv()
-    parametersFromEnv.forEach{(k, _) ->
-        STATIC.LOGGER.info("Using configuration from ENV for $k")
+    val parametersFromConfig = getParametersFromConfig()
+    val configsToUse = parametersFromConfig
+            .filterNot { config -> parametersFromEnv.map { it.configKey }.contains(config.configKey) }
+            .toMutableList()
+    configsToUse.addAll(parametersFromEnv)
+
+    configsToUse.forEach { config ->
+        STATIC.LOGGER.info("Using configuration from {} for key {}", config.configSource, config.configKey)
     }
-    return parametersFromEnv
+    return configsToUse.map { Pair(it.configKey, it.configValue) }.toMap()
 }
 
-private fun getParametersFromEnv(): Map<Config, String> {
+private fun getParametersFromConfig(): List<ConfigValue> {
+    class ApplicationYml(
+            @Value("\${google.sheet_id}") val googleSheetId: String
+    )
+
+    val yml = ApplicationYml("")
+    return listOf(ConfigValue(ConfigSource.PROP, Config.GOOGLE_SHEET_ID, yml.googleSheetId))
+}
+
+private fun getParametersFromEnv(): List<ConfigValue> {
     val env = environmentConfiguration()
     return Config.values()
             .map { config -> Pair(config, getParameterFromEnv(env, config)) }
             .filter { config -> config.second != null }
-            .map { config -> Pair(config.first, config.second!!) }
-            .toMap()
+            .map { config -> ConfigValue(ConfigSource.ENV, config.first, config.second!!) }
 }
 
 private fun getParameterFromEnv(env: EnvironmentConfiguration, config: Config): String? {
@@ -66,17 +105,15 @@ private fun googleSheetClientForNonSpringBoot(): GoogleSheetClient {
             .second.replace("'", "")
 
     STATIC.LOGGER.info("Using dev spreadSheetId={}", spreadSheetId)
-    return GoogleSheetClient(STATIC.CONFIGS, spreadSheetId)
+    val configMap = STATIC.CONFIGS.toMutableMap()
+    configMap[Config.GOOGLE_SHEET_ID] = spreadSheetId
+    STATIC.CONFIGS = configMap
+    return GoogleSheetClient(Configurations(), jsonFactory())
 }
 
-fun readLines() {
+private fun readLinesNonSpringBoot() {
     val lines = googleSheetClientForNonSpringBoot().listValues()
     lines.forEach{
         STATIC.LOGGER.info("line: {}", it)
     }
-}
-
-fun main() {
-    STATIC.LOGGER.info("Running locally without Spring Boot")
-    readLines()
 }
