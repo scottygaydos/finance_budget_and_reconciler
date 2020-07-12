@@ -5,6 +5,7 @@ import net.inherency.google.GoogleSheetClient
 import org.apache.commons.configuration.EnvironmentConfiguration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.File
 
 object STATIC {
     val LOGGER: Logger = LoggerFactory.getLogger("App")
@@ -15,7 +16,8 @@ object STATIC {
 // Every external configuration value should be enumerated here!
 enum class Config {
     GMAIL_APP_NAME,
-    AUTH_JSON
+    AUTH_JSON,
+    GOOGLE_SHEET_ID
 }
 
 fun jsonFactory(): JacksonFactory {
@@ -49,14 +51,32 @@ private fun getParameterFromEnv(env: EnvironmentConfiguration, config: Config): 
     return env.map[config.name.toLowerCase()] as String?
 }
 
+private fun googleSheetClientForNonSpringBoot(): GoogleSheetClient {
+    //Hard coded on purpose - we should never use Main in prod
+    val devYml = "application.yml.dev"
+    val file = File(Config::javaClass.javaClass.classLoader
+            .getResource(devYml)!!.file)
+    val spreadSheetId = file.readLines()
+            .filter { it.contains("sheet_id") }
+            .map {
+                val firstAndSecond = it.split(":")
+                Pair(firstAndSecond[0], firstAndSecond[1].trim())
+            }
+            .first()
+            .second.replace("'", "")
+
+    STATIC.LOGGER.info("Using dev spreadSheetId={}", spreadSheetId)
+    return GoogleSheetClient(STATIC.CONFIGS, spreadSheetId)
+}
+
 fun readLines() {
-    val drive = GoogleSheetClient(STATIC.CONFIGS)
-    val lines = drive.listValues()
+    val lines = googleSheetClientForNonSpringBoot().listValues()
     lines.forEach{
         STATIC.LOGGER.info("line: {}", it)
     }
 }
 
 fun main() {
+    STATIC.LOGGER.info("Running locally without Spring Boot")
     readLines()
 }

@@ -7,17 +7,19 @@ import com.google.api.services.sheets.v4.SheetsScopes
 import net.inherency.Config
 import net.inherency.jsonFactory
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 
-class GoogleSheetClient(private val configs: Map<Config, String>) {
+class GoogleSheetClient(
+        private val configs: Map<Config, String>,
+        @Value("\${google.sheet_id}") private val googleSheetId: String) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
     fun listValues(): MutableCollection<Any> {
-        val financesSheetId = "1JyhI0a8Q4MtPVDwT9nPsMCHtDqT3pan258ygEG5bQ6M"
         val range = "Transactions!A1:B"
         val response = login()
                 .spreadsheets()
-                .values()[financesSheetId, range]
+                .values()[googleSheetId, range]
                 .execute()
         return response.values
     }
