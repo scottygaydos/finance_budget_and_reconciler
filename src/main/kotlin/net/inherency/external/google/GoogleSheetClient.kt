@@ -1,18 +1,18 @@
-package net.inherency.google
+package net.inherency.external.google
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.SheetsScopes
-import net.inherency.Config
-import net.inherency.Configurations
+import net.inherency.config.ConfigurationService
+import net.inherency.vo.Config
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class GoogleSheetClient(
-        private val configs: Configurations,
+        private val configs: ConfigurationService,
         private val jsonFactory: JacksonFactory) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -47,11 +47,11 @@ class GoogleSheetClient(
     }
 
     private fun credentialsKey(): String {
-        return getConfig(Config.AUTH_JSON)
+        return getConfig(Config.GOOGLE_AUTH_JSON)
     }
 
     private fun googleApplicationName(): String {
-        return getConfig(Config.GMAIL_APP_NAME)
+        return getConfig(Config.GOOGLE_APP_NAME)
     }
 
     private fun googleSheetId(): String {
@@ -59,7 +59,7 @@ class GoogleSheetClient(
     }
 
     private fun getConfig(config: Config): String {
-        return configs.get(config) ?: error("Could not find $config")
+        return configs.get(config)
     }
 
     private fun googleSheetScopes(): List<String> {
