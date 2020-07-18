@@ -23,8 +23,10 @@ open class SpringBootMain {
     }
 
     @Bean
-    open fun environmentConfiguration(): EnvironmentConfiguration {
-        return EnvironmentConfiguration()
+    open fun getEnvVars(): EnvVars {
+        // For some strange reason, we have to use env.map instead of env.getString(...)
+        // If we use env.getString(), sometimes, config values (mainly JSON keys) get cut off... not sure why.
+        return EnvironmentConfiguration().map
     }
 }
 
@@ -45,6 +47,8 @@ open class CommandLineRunnerK(
     }
 
 }
+
+typealias EnvVars = Map<String, Any>
 
 fun main(args: Array<String>) {
     SpringApplication.run(SpringBootMain::class.java, *args)

@@ -6,7 +6,7 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.SheetsScopes
 import net.inherency.config.ConfigurationService
-import net.inherency.vo.Config
+import net.inherency.config.ConfigKey
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -19,14 +19,14 @@ class GoogleSheetClient(
 
     fun listValues(): MutableCollection<Any> {
         val range = "Transactions!A1:B"
-        val response = login()
+        val response = buildSheetsWithCredentials()
                 .spreadsheets()
                 .values()[googleSheetId(), range]
                 .execute()
         return response.values
     }
 
-    private fun login(): Sheets {
+    private fun buildSheetsWithCredentials(): Sheets {
         val key= credentialsKey()
 
         try {
@@ -47,19 +47,19 @@ class GoogleSheetClient(
     }
 
     private fun credentialsKey(): String {
-        return getConfig(Config.GOOGLE_AUTH_JSON)
+        return getConfig(ConfigKey.GOOGLE_AUTH_JSON)
     }
 
     private fun googleApplicationName(): String {
-        return getConfig(Config.GOOGLE_APP_NAME)
+        return getConfig(ConfigKey.GOOGLE_APP_NAME)
     }
 
     private fun googleSheetId(): String {
-        return getConfig(Config.GOOGLE_SHEET_ID)
+        return getConfig(ConfigKey.GOOGLE_SHEET_ID)
     }
 
-    private fun getConfig(config: Config): String {
-        return configs.get(config)
+    private fun getConfig(configKey: ConfigKey): String {
+        return configs.get(configKey)
     }
 
     private fun googleSheetScopes(): List<String> {

@@ -1,8 +1,8 @@
-package net.inherency.vo
+package net.inherency.config
 
 /** INF classes and instances *************************************************/
 // Every external configuration value should be enumerated here!
-enum class Config {
+enum class ConfigKey {
     CHROME_WAIT_FOR_UPDATE_SECONDS,
     CHROME_WEB_DRIVER_LOCATION,
     CHROME_WEB_DRIVER_DOWNLOAD_FILE,

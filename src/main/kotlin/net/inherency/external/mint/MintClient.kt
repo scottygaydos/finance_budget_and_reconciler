@@ -1,7 +1,7 @@
 package net.inherency.external.mint
 
 import net.inherency.config.ConfigurationService
-import net.inherency.vo.Config
+import net.inherency.config.ConfigKey
 import net.inherency.vo.MintTransaction
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
@@ -15,9 +15,10 @@ import java.nio.file.Path
 class MintClient(private val configs: ConfigurationService, private val mintFileParser: MintFileParser) {
 
     private val log = LoggerFactory.getLogger(MintClient::class.java)
+    private val chromeDriverSystemPropertyKey = "webdriver.chrome.driver"
 
     fun downloadAllTransactions(): List<MintTransaction> {
-        log.info("Config to wait for {} seconds.", configs.get(Config.CHROME_WAIT_FOR_UPDATE_SECONDS))
+        log.info("Config to wait for {} seconds.", configs.get(ConfigKey.CHROME_WAIT_FOR_UPDATE_SECONDS))
         setChromeDriverLocation()
         val driver = createMintDriverInstance()
         navigateToMintPage(driver)
@@ -37,7 +38,7 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     }
 
     private fun getDownloadFilePath(): String {
-        val path = getConfig(Config.CHROME_WEB_DRIVER_DOWNLOAD_FILE)
+        val path = getConfig(ConfigKey.CHROME_WEB_DRIVER_DOWNLOAD_FILE)
         log.info("Using download path: {}", path)
         return path
     }
@@ -52,7 +53,7 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     }
 
     private fun transformFileToMintTransactions(downloadFilePath: String): List<MintTransaction> {
-        return mintFileParser.parseFile(File(downloadFilePath))
+        return mintFileParser.parseFile(File(downloadFilePath).readText())
     }
 
     private fun waitForDownloadCompletion() {
@@ -60,12 +61,12 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     }
 
     private fun downloadTransactionFile(driver: ChromeDriver) {
-        val transactionDownloadLink = getConfig(Config.MINT_TRANSACTION_DOWNLOAD_LINK)
+        val transactionDownloadLink = getConfig(ConfigKey.MINT_TRANSACTION_DOWNLOAD_LINK)
         driver.get(transactionDownloadLink)
     }
 
     private fun waitForTransactionRefreshToComplete(driver: ChromeDriver) {
-        val waitForUpdateSeconds = getConfig(Config.CHROME_WAIT_FOR_UPDATE_SECONDS).toInt()
+        val waitForUpdateSeconds = getConfig(ConfigKey.CHROME_WAIT_FOR_UPDATE_SECONDS).toInt()
         var foundRefreshText = false
         var attemptCounter = 0
         while (!foundRefreshText) {
@@ -83,8 +84,8 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     }
 
     private fun completeSignInForm(driver: ChromeDriver) {
-        val email = getConfig(Config.MINT_LOGIN_EMAIL)
-        val password = getConfig(Config.MINT_LOGIN_PASSWORD)
+        val email = getConfig(ConfigKey.MINT_LOGIN_EMAIL)
+        val password = getConfig(ConfigKey.MINT_LOGIN_PASSWORD)
         driver.findElement(By.name("Email")).sendKeys(email)
         driver.findElement(By.name("Password")).sendKeys(password)
         driver.findElement(By.name("SignIn")).click()
@@ -96,18 +97,18 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     }
 
     private fun navigateToMintPage(driver: ChromeDriver) {
-        val mintPage = getConfig(Config.MINT_LOGIN_PAGE)
+        val mintPage = getConfig(ConfigKey.MINT_LOGIN_PAGE)
         log.info("Loading mint page: {}", mintPage)
         driver.get(mintPage)
     }
 
     private fun setChromeDriverLocation() {
-        val driverLocation= getConfig(Config.CHROME_WEB_DRIVER_LOCATION)
+        val driverLocation= getConfig(ConfigKey.CHROME_WEB_DRIVER_LOCATION)
         log.info("Using chrome driver location: {}", driverLocation)
-        System.setProperty("webdriver.chrome.driver", driverLocation)
+        System.setProperty(chromeDriverSystemPropertyKey, driverLocation)
     }
 
-    private fun getConfig(config: Config): String {
-        return configs.get(config)
+    private fun getConfig(configKey: ConfigKey): String {
+        return configs.get(configKey)
     }
 }

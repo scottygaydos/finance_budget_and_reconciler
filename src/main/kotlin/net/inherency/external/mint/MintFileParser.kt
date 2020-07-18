@@ -5,7 +5,7 @@ import net.inherency.vo.CreditOrDebit
 import net.inherency.vo.MintTransaction
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.io.File
+import java.lang.IllegalArgumentException
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -14,10 +14,19 @@ import java.time.format.DateTimeFormatter
 class MintFileParser {
 
     private val log = LoggerFactory.getLogger(MintFileParser::class.java)
+    private val expectedHeaderLineValues =
+        listOf("Date","Description","Original Description","Amount","Transaction Type","Category","Account Name","Labels","Notes")
 
-    fun parseFile(file: File): List<MintTransaction> {
-        val listOfRows = CsvReader().readAll(file).toMutableList()
-        listOfRows.removeAt(0) //First row is headers
+
+    fun parseFile(fileContents: String): List<MintTransaction> {
+        val listOfRows = CsvReader().readAll(fileContents).toMutableList()
+        if (listOfRows.size < 2) {
+            return emptyList()
+        }
+        val header = listOfRows.removeAt(0)
+        if (header != expectedHeaderLineValues) {
+            throw IllegalArgumentException("File does not follow expected format")
+        }
         log.info("Read {} rows from mint file.  Parsing now.", listOfRows.size)
         return transformListsIntoMintTransactions(listOfRows)
     }
