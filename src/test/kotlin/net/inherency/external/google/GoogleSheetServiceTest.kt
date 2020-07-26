@@ -24,7 +24,7 @@ class GoogleSheetServiceTest {
     @Test
     fun `GIVEN the transactions tab and a list of mint transactions, when we call clearTabAndWriteAllValuesToSheetAfterSorting, then all existing data is cleared before inserting new data`() {
         //GIVEN
-        val tabName = TabName.TRANSACTIONS
+        val tabName = TabName.MINT_TRANSACTIONS
         val mintTransactions = listOf(
                 MintTransaction(LocalDate.of(2020, 1, 3), "third", "", 0, CreditOrDebit.DEBIT, "", ""),
                 MintTransaction(LocalDate.of(2020, 1, 1), "first", "", 0, CreditOrDebit.DEBIT, "", ""),
@@ -43,7 +43,7 @@ class GoogleSheetServiceTest {
     @Test
     fun `GIVEN the transactions tab and a list of mint transactions, when we call clearTabAndWriteAllValuesToSheetAfterSorting, the transactions are sorted and inserted after a header`() {
         //GIVEN
-        val tabName = TabName.TRANSACTIONS
+        val tabName = TabName.MINT_TRANSACTIONS
         val mintTransactions = listOf(
                 MintTransaction(LocalDate.of(2020, 1, 3), "third", "", 0, CreditOrDebit.DEBIT, "", ""),
                 MintTransaction(LocalDate.of(2020, 1, 1), "first", "", 0, CreditOrDebit.DEBIT, "", ""),
@@ -69,7 +69,7 @@ class GoogleSheetServiceTest {
     fun `GIVEN transaction records with a header exist in the sheet WHEN we call listAllMintTransactionsInTransactionsTab THEN we report those records without the header`() {
         //GIVEN
         //1. find data in sheet (mock client)
-        whenever(googleSheetClient.listValuesInTab(TabName.TRANSACTIONS)).thenReturn(
+        whenever(googleSheetClient.listValuesInTab(TabName.MINT_TRANSACTIONS)).thenReturn(
                 listOf(
                         MintFileParser.HEADER_LINE_VALUES,
                         listOf("2020-01-03", "third", "", "0", "DEBIT","",""),

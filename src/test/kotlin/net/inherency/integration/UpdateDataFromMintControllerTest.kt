@@ -77,7 +77,7 @@ class UpdateDataFromMintControllerTest {
         //This is accomplished by the MockBean annotation on googleSheetClient
 
         //AND: Google sheets responds with those three transactions when we ask to list transactions
-        whenever(googleSheetClient.listValuesInTab(TabName.TRANSACTIONS)).thenReturn(testDataAsListOfListOfStrings)
+        whenever(googleSheetClient.listValuesInTab(TabName.MINT_TRANSACTIONS)).thenReturn(testDataAsListOfListOfStrings)
 
 
         //WHEN: We try to download mint transactions and update our sheet

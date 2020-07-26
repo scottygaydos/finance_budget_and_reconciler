@@ -13,7 +13,7 @@ class GoogleSheetService(
         private val mintTransactionFactory: MintTransactionFactory) {
 
     fun listAllMintTransactionsInTransactionsTab(): List<MintTransaction> {
-        val recordsInTab = googleSheetClient.listValuesInTab(TabName.TRANSACTIONS)
+        val recordsInTab = googleSheetClient.listValuesInTab(TabName.MINT_TRANSACTIONS)
         if (recordsInTab.isEmpty()) {
             return emptyList()
         }

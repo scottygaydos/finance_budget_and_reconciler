@@ -20,7 +20,7 @@ class UpdateDataFromMintController(
     @PostMapping(value = ["update"])
     fun update(): List<MintTransaction> {
         val allMintTransactions = downloadAllMintTransactions()
-        googleSheetService.clearTabAndWriteAllValuesToSheetAfterSorting(TabName.TRANSACTIONS, allMintTransactions)
+        googleSheetService.clearTabAndWriteAllValuesToSheetAfterSorting(TabName.MINT_TRANSACTIONS, allMintTransactions)
         return googleSheetService.listAllMintTransactionsInTransactionsTab()
     }
 
