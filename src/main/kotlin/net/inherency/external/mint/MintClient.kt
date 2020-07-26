@@ -48,6 +48,7 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
 
     private fun closeChrome(driver: ChromeDriver) {
         driver.close()
+        driver.quit()
     }
 
     private fun getDownloadFilePath(): String {
