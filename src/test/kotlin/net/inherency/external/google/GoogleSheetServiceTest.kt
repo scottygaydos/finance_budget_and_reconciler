@@ -9,8 +9,8 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import net.inherency.external.mint.MintFileParser
 import net.inherency.external.mint.MintTransactionFactory
-import net.inherency.vo.CreditOrDebit
-import net.inherency.vo.MintTransaction
+import net.inherency.external.mint.CreditOrDebit
+import net.inherency.external.mint.MintTransaction
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import kotlin.test.assertEquals

@@ -1,4 +1,4 @@
-package net.inherency.vo
+package net.inherency.external.mint
 
 import java.time.LocalDate
 

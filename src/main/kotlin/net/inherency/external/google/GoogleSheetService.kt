@@ -4,7 +4,7 @@ import net.inherency.external.mint.MintFileParser
 import net.inherency.external.mint.MintTransactionFactory
 import net.inherency.external.parseGoogleSheetLocalDate
 import net.inherency.external.parseGoogleSheetAmount
-import net.inherency.vo.MintTransaction
+import net.inherency.external.mint.MintTransaction
 import org.springframework.stereotype.Service
 
 @Service

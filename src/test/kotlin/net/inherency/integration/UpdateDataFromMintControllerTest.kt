@@ -8,7 +8,7 @@ import net.inherency.config.ConfigKey
 import net.inherency.config.ConfigurationService
 import net.inherency.external.google.GoogleSheetClient
 import net.inherency.external.google.TabName
-import net.inherency.vo.CreditOrDebit
+import net.inherency.external.mint.CreditOrDebit
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

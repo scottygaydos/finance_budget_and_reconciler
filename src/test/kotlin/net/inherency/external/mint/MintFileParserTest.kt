@@ -2,7 +2,6 @@ package net.inherency.external.mint
 
 import net.inherency.external.parseMintFileAmount
 import net.inherency.external.parseMintFileLocalDate
-import net.inherency.vo.CreditOrDebit
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import kotlin.test.assertEquals

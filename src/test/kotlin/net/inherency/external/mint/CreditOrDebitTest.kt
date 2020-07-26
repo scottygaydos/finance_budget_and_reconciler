@@ -1,4 +1,4 @@
-package net.inherency.vo
+package net.inherency.external.mint
 
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments

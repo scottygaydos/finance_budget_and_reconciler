@@ -4,7 +4,6 @@ import net.inherency.config.ConfigurationService
 import net.inherency.config.ConfigKey
 import net.inherency.external.parseMintFileAmount
 import net.inherency.external.parseMintFileLocalDate
-import net.inherency.vo.MintTransaction
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions

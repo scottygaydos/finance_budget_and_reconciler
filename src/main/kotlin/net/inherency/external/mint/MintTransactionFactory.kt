@@ -1,7 +1,5 @@
 package net.inherency.external.mint
 
-import net.inherency.vo.CreditOrDebit
-import net.inherency.vo.MintTransaction
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
