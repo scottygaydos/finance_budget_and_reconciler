@@ -1,0 +1,29 @@
+[{
+  "request": {
+    "method": "GET",
+    "url": "/login"
+  },
+  "response": {
+    "status": 200,
+    "body": "<html><body><form><input name='Email' /><input name='Password' /><button name='SignIn' /></form></body></html>",
+    "headers": {
+      "Content-Type": "text/html"
+    }
+  }
+},
+
+{
+  "request": {
+    "method": "GET",
+    "url": "/download"
+  },
+  "response": {
+    "status": 200,
+    "body": " \"Date\",\"Description\",\"Original Description\",\"Amount\",\"Transaction Type\",\"Category\",\"Account Name\",\"Labels\",\"Notes\" \n \"7/17/2020\",\"H-E-B ONLINE\",\"H-E-B ONLINE\",\"128.25\",\"debit\",\"Groceries\",\"Checking Account\",\"\",\"\" \n \"7/13/2020\",\"Apple\",\"APPLE.COM/BILL\",\"0.99\",\"debit\",\"Electronics & Software\",\"Credit Card(1234)\",\"\",\"\" \n \"7/03/2020\",\"Employer PPD ID: 1224445555\",\"Employer Payroll\",\"1288.24\",\"credit\",\"Paycheck\",\"Checking Account\",\"\",\"\" ",
+    "headers": {
+      "Content-Type": "text/csv",
+      "Content-Disposition": "attachment;filename=transactions.csv"
+    }
+  }
+}
+]

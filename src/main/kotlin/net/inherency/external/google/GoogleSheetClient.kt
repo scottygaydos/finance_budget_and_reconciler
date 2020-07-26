@@ -5,6 +5,8 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.SheetsScopes
+import com.google.api.services.sheets.v4.model.ClearValuesRequest
+import com.google.api.services.sheets.v4.model.ValueRange
 import net.inherency.config.ConfigurationService
 import net.inherency.config.ConfigKey
 import org.slf4j.LoggerFactory
@@ -17,13 +19,36 @@ class GoogleSheetClient(
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    fun listValues(): MutableCollection<Any> {
-        val range = "Transactions!A1:B"
+    fun listValuesInTab(tabName: TabName): List<List<String>> {
+        val range = tabName.toString()
         val response = buildSheetsWithCredentials()
                 .spreadsheets()
                 .values()[googleSheetId(), range]
                 .execute()
-        return response.values
+
+        @Suppress("UNCHECKED_CAST")
+        return response.values.toList()[2] as List<List<String>>
+    }
+
+    fun clearAllDataInTab(tabName: TabName) {
+        val clearValuesRequest = ClearValuesRequest()
+        buildSheetsWithCredentials().spreadsheets().values().clear(
+                googleSheetId(),
+                tabName.toString(),
+                clearValuesRequest
+        ).execute()
+    }
+
+    fun writeAllValuesToTab(tabName: TabName, values: List<List<String>>) {
+        @Suppress("UNCHECKED_CAST")
+        val appendBody = ValueRange().setValues(values as List<MutableList<Any>>?)
+
+        val range = "$tabName!A1"
+        buildSheetsWithCredentials().spreadsheets().values()
+                .append(googleSheetId(), range, appendBody)
+                .setValueInputOption("RAW")
+                .setInsertDataOption("INSERT_ROWS")
+                .execute()
     }
 
     private fun buildSheetsWithCredentials(): Sheets {
@@ -59,7 +84,7 @@ class GoogleSheetClient(
     }
 
     private fun getConfig(configKey: ConfigKey): String {
-        return configs.get(configKey)
+        return configs.getString(configKey)
     }
 
     private fun googleSheetScopes(): List<String> {

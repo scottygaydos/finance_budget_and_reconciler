@@ -4,8 +4,9 @@ package net.inherency.config
 // Every external configuration value should be enumerated here!
 enum class ConfigKey {
     CHROME_WAIT_FOR_UPDATE_SECONDS,
-    CHROME_WEB_DRIVER_LOCATION,
     CHROME_WEB_DRIVER_DOWNLOAD_FILE,
+    CHROME_WEB_DRIVER_HEADLESS,
+    CHROME_WEB_DRIVER_LOCATION,
     GOOGLE_APP_NAME,
     GOOGLE_AUTH_JSON,
     GOOGLE_SHEET_ID,

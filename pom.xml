@@ -20,6 +20,10 @@
         <apache.commons.configuration.version>1.10</apache.commons.configuration.version>
         <selenium.version>3.9.1</selenium.version>
         <csv.reader.version>0.7.3</csv.reader.version>
+        <kotlin.jackson.version>2.11.0</kotlin.jackson.version>
+        <wiremock.version>2.27.1</wiremock.version>
+        <kotlin.mockito.version>2.2.0</kotlin.mockito.version>
+        <config.test.env.vars>1.19.0</config.test.env.vars>
     </properties>
 
     <dependencies>
@@ -36,6 +40,11 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-chrome-driver</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
         </dependency>
         <dependency>
@@ -81,6 +90,28 @@
             <artifactId>kotlin-test-junit</artifactId>
             <version>${kotlin.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.nhaarman.mockitokotlin2</groupId>
+            <artifactId>mockito-kotlin</artifactId>
+            <version>${kotlin.mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
+            <version>${wiremock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
     </dependencies>
 

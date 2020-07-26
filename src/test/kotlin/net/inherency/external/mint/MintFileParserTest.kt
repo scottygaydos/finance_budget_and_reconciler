@@ -1,7 +1,9 @@
 package net.inherency.external.mint
 
+import net.inherency.external.parseMintFileAmount
+import net.inherency.external.parseMintFileLocalDate
 import net.inherency.vo.CreditOrDebit
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -9,7 +11,8 @@ import kotlin.test.assertTrue
 
 class MintFileParserTest {
 
-    private val mintFileParser = MintFileParser()
+    private val mintTransactionFactory = MintTransactionFactory()
+    private val mintFileParser = MintFileParser(mintTransactionFactory)
 
     @Test
     fun `Parser should successfully transform each line of the CSV file into a MintTransaction while ignoring the header`() {
@@ -20,7 +23,10 @@ class MintFileParserTest {
         "7/03/2020","Employer PPD ID: 1224445555","Employer Payroll","1288.24","credit","Paycheck","Checking Account","",""
         """.trimIndent()
 
-        val transactions = mintFileParser.parseFile(mintFileContent)
+        val transactions = mintFileParser.parseFile(
+                mintFileContent,
+                { parseMintFileLocalDate(it) },
+                { parseMintFileAmount(it) })
 
         assertEquals(3, transactions.size)
 
@@ -61,7 +67,12 @@ class MintFileParserTest {
         "7/03/2020";"Employer PPD ID: 1224445555";"Employer Payroll";"1288.24";"credit";"Paycheck";"Checking Account";"";""
         """.trimIndent()
 
-        assertFailsWith(Exception::class) {mintFileParser.parseFile(mintFileContentSemiColon)}
+        assertFailsWith(Exception::class) {
+            mintFileParser.parseFile(
+                    mintFileContentSemiColon,
+                    { parseMintFileLocalDate(it) },
+                    { parseMintFileAmount(it) })
+        }
     }
 
     @Test
@@ -69,7 +80,10 @@ class MintFileParserTest {
         val mintFileContentEmpty = """
         """.trimIndent()
 
-        val mintTransactions = mintFileParser.parseFile(mintFileContentEmpty)
+        val mintTransactions = mintFileParser.parseFile(
+                mintFileContentEmpty,
+                { parseMintFileLocalDate(it) },
+                { parseMintFileAmount(it) })
 
         assertTrue(mintTransactions.isEmpty())
     }
@@ -80,7 +94,10 @@ class MintFileParserTest {
         "Date","Description","Original Description","Amount","Transaction Type","Category","Account Name","Labels","Notes"
         """.trimIndent()
 
-        val mintTransactions = mintFileParser.parseFile(mintFileContent)
+        val mintTransactions = mintFileParser.parseFile(
+                mintFileContent,
+                { parseMintFileLocalDate(it) },
+                { parseMintFileAmount(it) })
 
         assertTrue(mintTransactions.isEmpty())
     }
@@ -93,7 +110,11 @@ class MintFileParserTest {
         "7/03/2020","Employer PPD ID: 1224445555","Employer Payroll","1288.24","credit","Paycheck","Checking Account","",""
         """.trimIndent()
 
-        assertFailsWith(IllegalArgumentException::class) {mintFileParser.parseFile(mintFileContent)}
+        assertFailsWith(IllegalArgumentException::class) {
+            mintFileParser.parseFile(
+                    mintFileContent,
+                    { parseMintFileLocalDate(it) },
+                    { parseMintFileAmount(it) })
+        }
     }
-
 }

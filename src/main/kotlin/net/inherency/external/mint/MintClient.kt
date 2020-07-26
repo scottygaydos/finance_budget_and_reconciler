@@ -2,9 +2,12 @@ package net.inherency.external.mint
 
 import net.inherency.config.ConfigurationService
 import net.inherency.config.ConfigKey
+import net.inherency.external.parseMintFileAmount
+import net.inherency.external.parseMintFileLocalDate
 import net.inherency.vo.MintTransaction
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.File
@@ -14,19 +17,29 @@ import java.nio.file.Path
 @Service
 class MintClient(private val configs: ConfigurationService, private val mintFileParser: MintFileParser) {
 
+    companion object {
+        const val FORM_EMAIL_INPUT = "Email"
+        const val FORM_PASSWORD_INPUT = "Password"
+        const val FORM_SIGN_IN_BUTTON = "SignIn"
+    }
+
     private val log = LoggerFactory.getLogger(MintClient::class.java)
     private val chromeDriverSystemPropertyKey = "webdriver.chrome.driver"
 
     fun downloadAllTransactions(): List<MintTransaction> {
-        log.info("Config to wait for {} seconds.", configs.get(ConfigKey.CHROME_WAIT_FOR_UPDATE_SECONDS))
+        log.info("Config to wait for {} seconds.", configs.getString(ConfigKey.CHROME_WAIT_FOR_UPDATE_SECONDS))
         setChromeDriverLocation()
         val driver = createMintDriverInstance()
-        navigateToMintPage(driver)
-        completeSignInForm(driver)
-        waitForTransactionRefreshToComplete(driver)
-        downloadTransactionFile(driver)
-        waitForDownloadCompletion()
-        closeChrome(driver)
+        try {
+            navigateToMintPage(driver)
+            completeSignInForm(driver)
+            waitForTransactionRefreshToComplete(driver)
+            downloadTransactionFile(driver)
+            waitForDownloadCompletion()
+        } finally {
+            closeChrome(driver)
+        }
+
         val downloadFilePath = getDownloadFilePath()
         val transactions = transformFileToMintTransactions(downloadFilePath)
         deleteDownloadFile(downloadFilePath)
@@ -38,7 +51,7 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     }
 
     private fun getDownloadFilePath(): String {
-        val path = getConfig(ConfigKey.CHROME_WEB_DRIVER_DOWNLOAD_FILE)
+        val path = configs.getString(ConfigKey.CHROME_WEB_DRIVER_DOWNLOAD_FILE)
         log.info("Using download path: {}", path)
         return path
     }
@@ -53,7 +66,10 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     }
 
     private fun transformFileToMintTransactions(downloadFilePath: String): List<MintTransaction> {
-        return mintFileParser.parseFile(File(downloadFilePath).readText())
+        return mintFileParser.parseFile(
+                File(downloadFilePath).readText(),
+                { parseMintFileLocalDate(it) },
+                { parseMintFileAmount(it) } )
     }
 
     private fun waitForDownloadCompletion() {
@@ -61,12 +77,12 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     }
 
     private fun downloadTransactionFile(driver: ChromeDriver) {
-        val transactionDownloadLink = getConfig(ConfigKey.MINT_TRANSACTION_DOWNLOAD_LINK)
+        val transactionDownloadLink = configs.getString(ConfigKey.MINT_TRANSACTION_DOWNLOAD_LINK)
         driver.get(transactionDownloadLink)
     }
 
     private fun waitForTransactionRefreshToComplete(driver: ChromeDriver) {
-        val waitForUpdateSeconds = getConfig(ConfigKey.CHROME_WAIT_FOR_UPDATE_SECONDS).toInt()
+        val waitForUpdateSeconds = configs.getInt(ConfigKey.CHROME_WAIT_FOR_UPDATE_SECONDS)
         var foundRefreshText = false
         var attemptCounter = 0
         while (!foundRefreshText) {
@@ -84,31 +100,47 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     }
 
     private fun completeSignInForm(driver: ChromeDriver) {
-        val email = getConfig(ConfigKey.MINT_LOGIN_EMAIL)
-        val password = getConfig(ConfigKey.MINT_LOGIN_PASSWORD)
-        driver.findElement(By.name("Email")).sendKeys(email)
-        driver.findElement(By.name("Password")).sendKeys(password)
-        driver.findElement(By.name("SignIn")).click()
+        val email = configs.getString(ConfigKey.MINT_LOGIN_EMAIL)
+        val password = configs.getString(ConfigKey.MINT_LOGIN_PASSWORD)
+        driver.findElement(By.name(FORM_EMAIL_INPUT)).sendKeys(email)
+        driver.findElement(By.name(FORM_PASSWORD_INPUT)).sendKeys(password)
+        driver.findElement(By.name(FORM_SIGN_IN_BUTTON)).click()
         log.info("Completed sign in with email = {} and password <...>", email)
     }
 
     private fun createMintDriverInstance(): ChromeDriver {
-        return ChromeDriver()
+        return if (configs.getBoolean(ConfigKey.CHROME_WEB_DRIVER_HEADLESS)) {
+            val downloadFilepath = "C:\\Users\\sgayd\\Downloads\\"
+            val chromePreferences = HashMap<String, Any>()
+            chromePreferences["profile.default_content_settings.popups"] = 0
+            chromePreferences["download.prompt_for_download"] = "false"
+            chromePreferences["download.default_directory"] = downloadFilepath
+
+            val chromeOptions = ChromeOptions()
+            chromeOptions.addArguments(
+                    "--headless",
+                    "--disable-gpu",
+                    "--window-size=1920,1200",
+                    "--ignore-certificate-errors",
+                    "--start-maximized",
+                    "--disable-infobars")
+            chromeOptions.setExperimentalOption("prefs", chromePreferences)
+            ChromeDriver(chromeOptions)
+        } else {
+            ChromeDriver()
+        }
+
     }
 
     private fun navigateToMintPage(driver: ChromeDriver) {
-        val mintPage = getConfig(ConfigKey.MINT_LOGIN_PAGE)
+        val mintPage = configs.getString(ConfigKey.MINT_LOGIN_PAGE)
         log.info("Loading mint page: {}", mintPage)
         driver.get(mintPage)
     }
 
     private fun setChromeDriverLocation() {
-        val driverLocation= getConfig(ConfigKey.CHROME_WEB_DRIVER_LOCATION)
+        val driverLocation= configs.getString(ConfigKey.CHROME_WEB_DRIVER_LOCATION)
         log.info("Using chrome driver location: {}", driverLocation)
         System.setProperty(chromeDriverSystemPropertyKey, driverLocation)
-    }
-
-    private fun getConfig(configKey: ConfigKey): String {
-        return configs.get(configKey)
     }
 }

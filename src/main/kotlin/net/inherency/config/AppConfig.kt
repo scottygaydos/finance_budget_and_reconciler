@@ -13,7 +13,8 @@ data class AppConfig (
 data class ChromeConfig (
     val webDriverLocation: String,
     val webDriverDownloadFile: String,
-    val waitForUpdateSeconds: String
+    val waitForUpdateSeconds: String,
+    val webDriverHeadless: String
 )
 
 data class MintConfig (

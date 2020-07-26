@@ -10,4 +10,17 @@ data class MintTransaction(
         val creditOrDebit: CreditOrDebit,
         val category: String,
         val accountName: String
-)
+) {
+
+    fun toGoogleSheetRowList(): List<String> {
+        return listOf(
+                date.toString(),
+                description,
+                originalDescription,
+                amount.toString(),
+                creditOrDebit.toString(),
+                category,
+                accountName
+        )
+    }
+}
