@@ -1,6 +1,7 @@
 package net.inherency.finances.integration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.doyaaaaaken.kotlincsv.client.CsvReader
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
@@ -20,12 +21,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.format.datetime.standard.DateTimeFormatterFactory
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlin.test.assertEquals
-
-
 
 @SpringBootTest //This is necessary to auto-inject all classes and properties from test application.yml
 @AutoConfigureMockMvc //This is necessary to inject MockMvc
@@ -77,7 +80,7 @@ class UpdateDataFromMintControllerTest {
         //This is accomplished by the MockBean annotation on googleSheetClient
 
         //AND: Google sheets responds with those three transactions when we ask to list transactions
-        whenever(googleSheetClient.listValuesInTab(TabName.MINT_TRANSACTIONS)).thenReturn(testDataAsListOfListOfStrings)
+        whenever(googleSheetClient.listValuesInTab(TabName.MINT_TRANSACTIONS)).thenReturn(mintFileContentFromGoogleSheet)
 
 
         //WHEN: We try to download mint transactions and update our sheet
@@ -117,6 +120,32 @@ class UpdateDataFromMintControllerTest {
         assertEquals("Paycheck", thirdResponse["category"].asText())
         assertEquals("Checking Account", thirdResponse["accountName"].asText())
     }
-
-
 }
+
+private val firstDate = LocalDate.of(2020, 7, 17)
+private val secondDate = LocalDate.of(2020, 7, 13)
+private val thirdDate = LocalDate.of(2020, 7, 3)
+
+private val mintFileFormatter: DateTimeFormatter = DateTimeFormatterFactory("MM/dd/yyyy").createDateTimeFormatter()
+private val googleSheetFormatter: DateTimeFormatter = DateTimeFormatterFactory("yyyy-MM-dd").createDateTimeFormatter()
+
+private const val firstAmount = "128.25"
+private const val secondAmount = "0.99"
+private const val thirdAmount = "1288.24"
+
+private fun toCents(i: String): String = BigDecimal(i).multiply(BigDecimal("100")).toInt().toString()
+
+val mintFileContent = """
+        "Date","Description","Original Description","Amount","Transaction Type","Category","Account Name","Labels","Notes"
+        "${firstDate.format(mintFileFormatter)}","H-E-B ONLINE","H-E-B ONLINE","$firstAmount","debit","Groceries","Checking Account","",""
+        "${secondDate.format(mintFileFormatter)}","Apple","APPLE.COM/BILL","$secondAmount","debit","Electronics & Software","Credit Card(1234)","",""
+        "${thirdDate.format(mintFileFormatter)}","Employer PPD ID: 1224445555","Employer Payroll","$thirdAmount","credit","Paycheck","Checking Account","",""
+        """.trimIndent()
+
+val mintFileContentFromGoogleSheet = CsvReader().readAll("""
+        "Date","Description","Original Description","Amount","Transaction Type","Category","Account Name","Labels","Notes"
+        "${firstDate.format(googleSheetFormatter)}","H-E-B ONLINE","H-E-B ONLINE","${toCents(firstAmount)}","debit","Groceries","Checking Account","",""
+        "${secondDate.format(googleSheetFormatter)}","Apple","APPLE.COM/BILL","${toCents(secondAmount)}","debit","Electronics & Software","Credit Card(1234)","",""
+        "${thirdDate.format(googleSheetFormatter)}","Employer PPD ID: 1224445555","Employer Payroll","${toCents(thirdAmount)}","credit","Paycheck","Checking Account","",""
+        """.trimIndent()
+).toMutableList()
