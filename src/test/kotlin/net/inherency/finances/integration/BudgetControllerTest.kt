@@ -11,8 +11,7 @@ import net.inherency.finances.external.google.GoogleSheetClient
 import net.inherency.finances.external.google.TabName
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariables
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -53,10 +52,7 @@ class BudgetControllerTest {
     }
 
     @Test
-    @DisabledIfEnvironmentVariables(
-            DisabledIfEnvironmentVariable(named = "test-environment", matches = "ci"),
-            DisabledIfEnvironmentVariable(named = "test-environment", matches = "production")
-    )
+    @DisabledIfSystemProperty(named = "testEnvironment", matches = "ci")
     fun `Creating a budget for month and year from template successfully copies budget template data to the target month and year`() {
         //GIVEN: Google sheets integration works, allowing us to read and write the sheets
         //This is accomplished by the MockBean annotation on googleSheetClient

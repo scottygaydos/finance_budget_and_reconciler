@@ -13,8 +13,7 @@ import net.inherency.finances.domain.transaction.CreditOrDebit
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariables
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -68,10 +67,7 @@ class UpdateDataFromMintControllerTest {
     }
 
     @Test
-    @DisabledIfEnvironmentVariables(
-            DisabledIfEnvironmentVariable(named = "test-environment", matches = "ci"),
-            DisabledIfEnvironmentVariable(named = "test-environment", matches = "production")
-    )
+    @DisabledIfSystemProperty(named = "testEnvironment", matches = "ci")
     fun `UpdateDataFromMintController successfully logs into mint website and writes data to google sheet`() {
         //GIVEN: Mint website has three transactions to report
         //See stubbing method in WireMockContextInitializer
