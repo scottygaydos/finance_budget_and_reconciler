@@ -1,7 +1,5 @@
 package net.inherency.finances.external.mint
 
-import net.inherency.finances.external.mint.MintFileParser
-import net.inherency.finances.external.mint.MintTransactionFactory
 import net.inherency.finances.domain.transaction.CreditOrDebit
 import net.inherency.finances.external.parseMintFileAmount
 import net.inherency.finances.external.parseMintFileLocalDate

@@ -18,12 +18,13 @@ class MintTransactionFactory {
     }
 
     private fun createMintTransactionFromListOfStrings(
-            row: List<String>, dateParsingStrategy: (String) -> LocalDate, amountParsingStrategy: (String) -> Int): MintTransaction {
+            row: List<String>, dateParsingFunction: (String) -> LocalDate, amountParsingFunction: (String) -> Int)
+            : MintTransaction {
         return MintTransaction(
-                dateParsingStrategy(row[0]),
+                dateParsingFunction(row[0]),
                 row[1],
                 row[2],
-                amountParsingStrategy(row[3]),
+                amountParsingFunction(row[3]),
                 CreditOrDebit.parse(row[4]),
                 row[5],
                 row[6])
