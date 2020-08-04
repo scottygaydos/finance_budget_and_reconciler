@@ -31,7 +31,7 @@ data class CategorizedTransaction (
                 debitAccountId.toString(),
                 authorizedAmount.toString(),
                 settledAmount.toString(),
-                if (reconcilable) "1" else "0"
+                reconcilable.toString()
         )
     }
 }

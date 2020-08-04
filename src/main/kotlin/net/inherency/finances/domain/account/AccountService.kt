@@ -5,6 +5,10 @@ import org.springframework.stereotype.Service
 @Service
 class AccountService(private val accountRepository: AccountRepository) {
 
+    companion object {
+        const val GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME = "Global External Account"
+    }
+
     fun readAll(): List<Account> {
         val accounts = accountRepository.readAll()
         validateAccounts(accounts)

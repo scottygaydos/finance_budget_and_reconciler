@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 class BudgetCategoryService(private val budgetCategoryRepository: BudgetCategoryRepository) {
 
     @Suppress("unused")
-    fun readAllBudgetCategories(): List<BudgetCategoryData> {
+    fun readAll(): List<BudgetCategoryData> {
         val categories = budgetCategoryRepository.readAll()
         validateCategories(categories)
         return categories
