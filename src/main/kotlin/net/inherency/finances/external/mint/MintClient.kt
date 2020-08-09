@@ -79,7 +79,14 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
 
     private fun downloadTransactionFile(driver: ChromeDriver) {
         val transactionDownloadLink = configs.getString(ConfigKey.MINT_TRANSACTION_DOWNLOAD_LINK)
+        log.info("Downloading mint tx file: {}", transactionDownloadLink)
         driver.get(transactionDownloadLink)
+    }
+
+    private fun navigateToMintPage(driver: ChromeDriver) {
+        val mintPage = configs.getString(ConfigKey.MINT_LOGIN_PAGE)
+        log.info("Loading mint page: {}", mintPage)
+        driver.get(mintPage)
     }
 
     private fun waitForTransactionRefreshToComplete(driver: ChromeDriver) {
@@ -131,12 +138,6 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
             ChromeDriver()
         }
 
-    }
-
-    private fun navigateToMintPage(driver: ChromeDriver) {
-        val mintPage = configs.getString(ConfigKey.MINT_LOGIN_PAGE)
-        log.info("Loading mint page: {}", mintPage)
-        driver.get(mintPage)
     }
 
     private fun setChromeDriverLocation() {

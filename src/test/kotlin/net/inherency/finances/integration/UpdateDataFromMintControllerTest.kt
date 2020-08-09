@@ -1,15 +1,13 @@
 package net.inherency.finances.integration
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.github.doyaaaaaken.kotlincsv.client.CsvReader
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.whenever
 import net.inherency.finances.config.ConfigKey
 import net.inherency.finances.config.ConfigurationService
-import net.inherency.finances.external.google.GoogleSheetClient
-import net.inherency.finances.external.google.TabName
 import net.inherency.finances.domain.transaction.CreditOrDebit
+import net.inherency.finances.external.google.GoogleSheetClient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,45 +18,42 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
-import org.springframework.format.datetime.standard.DateTimeFormatterFactory
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import kotlin.test.assertEquals
 
 @SpringBootTest //This is necessary to auto-inject all classes and properties from test application.yml
 @AutoConfigureMockMvc //This is necessary to inject MockMvc
-@ContextConfiguration(initializers = [WireMockContextInitializer::class])
 class UpdateDataFromMintControllerTest {
 
     private val log = LoggerFactory.getLogger(UpdateDataFromMintControllerTest::class.java)
 
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection", "ThisIsAddedToAutowireInWireMockContextInitializer")
-    @Autowired
-    private lateinit var wireMockServer: WireMockServer
-
+    @Suppress("unused")
     @MockBean
     private lateinit var googleSheetClient: GoogleSheetClient
 
     @SpyBean
     private lateinit var configurationService: ConfigurationService
 
+    private lateinit var wireMock: WireMockServer
+
     @Autowired
     private lateinit var mockMvc: MockMvc
 
     @AfterEach
-    fun afterEach() {
-        wireMockServer.resetAll()
+    fun teardown() {
+        this.wireMock.stop()
     }
 
     @BeforeEach
     fun beforeAll() {
+        val wireMock = WireMockServer(PORT)
+        wireMock.start()
+        this.wireMock = wireMock
+
         //This allows us to continue setting non-sensitive variables in application.yml, but programmatically set
-        //sensitive environment variables so we don't have to document/teach testers how to configure their environment
-        //to run this test.
+        //sensitive environment variables so we don't have to document/teach other devs/testers
+        //how to configure their environment to run this test.
         doReturn("12345@!@$%").whenever(configurationService).getString(ConfigKey.GOOGLE_SHEET_ID)
         doReturn("finances").whenever(configurationService).getString(ConfigKey.GOOGLE_APP_NAME)
         doReturn("{key:val}").whenever(configurationService).getString(ConfigKey.GOOGLE_AUTH_JSON)
@@ -69,15 +64,12 @@ class UpdateDataFromMintControllerTest {
     @Test
     @DisabledIfSystemProperty(named = "testEnvironment", matches = "ci")
     fun `UpdateDataFromMintController successfully logs into mint website and writes data to google sheet`() {
-        //GIVEN: Mint website has three transactions to report
-        //See stubbing method in WireMockContextInitializer
+        //GIVEN: Mint website requires login and has three transactions to report
+        stubMintLogin(wireMock)
+        stubDownloadMintTransactionFileResponse(wireMock, "UpdateDataFromMintControllerTest")
 
         //AND: Google sheets integration works, allowing us to write the three transactions to a sheet
         //This is accomplished by the MockBean annotation on googleSheetClient
-
-        //AND: Google sheets responds with those three transactions when we ask to list transactions
-        whenever(googleSheetClient.listValuesInTab(TabName.MINT_TRANSACTIONS)).thenReturn(mintFileContentFromGoogleSheet)
-
 
         //WHEN: We try to download mint transactions and update our sheet
         val responseString = mockMvc.perform(post("/ws/updateData/update")).andReturn().response.contentAsString
@@ -117,31 +109,3 @@ class UpdateDataFromMintControllerTest {
         assertEquals("Checking Account", thirdResponse["accountName"].asText())
     }
 }
-
-private val firstDate = LocalDate.of(2020, 7, 17)
-private val secondDate = LocalDate.of(2020, 7, 13)
-private val thirdDate = LocalDate.of(2020, 7, 3)
-
-private val mintFileFormatter: DateTimeFormatter = DateTimeFormatterFactory("MM/dd/yyyy").createDateTimeFormatter()
-private val googleSheetFormatter: DateTimeFormatter = DateTimeFormatterFactory("yyyy-MM-dd").createDateTimeFormatter()
-
-private const val firstAmount = "128.25"
-private const val secondAmount = "0.99"
-private const val thirdAmount = "1288.24"
-
-private fun toCents(i: String): String = BigDecimal(i).multiply(BigDecimal("100")).toInt().toString()
-
-val mintFileContent = """
-        "Date","Description","Original Description","Amount","Transaction Type","Category","Account Name","Labels","Notes"
-        "${firstDate.format(mintFileFormatter)}","H-E-B ONLINE","H-E-B ONLINE","$firstAmount","debit","Groceries","Checking Account","",""
-        "${secondDate.format(mintFileFormatter)}","Apple","APPLE.COM/BILL","$secondAmount","debit","Electronics & Software","Credit Card(1234)","",""
-        "${thirdDate.format(mintFileFormatter)}","Employer PPD ID: 1224445555","Employer Payroll","$thirdAmount","credit","Paycheck","Checking Account","",""
-        """.trimIndent()
-
-val mintFileContentFromGoogleSheet = CsvReader().readAll("""
-        "Date","Description","Original Description","Amount","Transaction Type","Category","Account Name","Labels","Notes"
-        "${firstDate.format(googleSheetFormatter)}","H-E-B ONLINE","H-E-B ONLINE","${toCents(firstAmount)}","debit","Groceries","Checking Account","",""
-        "${secondDate.format(googleSheetFormatter)}","Apple","APPLE.COM/BILL","${toCents(secondAmount)}","debit","Electronics & Software","Credit Card(1234)","",""
-        "${thirdDate.format(googleSheetFormatter)}","Employer PPD ID: 1224445555","Employer Payroll","${toCents(thirdAmount)}","credit","Paycheck","Checking Account","",""
-        """.trimIndent()
-).toMutableList()

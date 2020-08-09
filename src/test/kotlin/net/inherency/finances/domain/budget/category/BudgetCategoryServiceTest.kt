@@ -28,7 +28,7 @@ class BudgetCategoryServiceTest {
 
         whenever(budgetCategoryRepository.readAll()).thenReturn(input)
 
-        val result = budgetCategoryService.readAllBudgetCategories()
+        val result = budgetCategoryService.readAll()
 
         Assertions.assertEquals(2, result.size)
         Assertions.assertEquals(foodCategory, result[0])
@@ -42,7 +42,7 @@ class BudgetCategoryServiceTest {
         whenever(budgetCategoryRepository.readAll()).thenReturn(input)
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-            budgetCategoryService.readAllBudgetCategories()
+            budgetCategoryService.readAll()
         }
     }
 
@@ -55,7 +55,7 @@ class BudgetCategoryServiceTest {
         whenever(budgetCategoryRepository.readAll()).thenReturn(input)
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-            budgetCategoryService.readAllBudgetCategories()
+            budgetCategoryService.readAll()
         }
     }
 
@@ -68,7 +68,7 @@ class BudgetCategoryServiceTest {
         whenever(budgetCategoryRepository.readAll()).thenReturn(input)
 
         Assertions.assertThrows(IllegalStateException::class.java) {
-            budgetCategoryService.readAllBudgetCategories()
+            budgetCategoryService.readAll()
         }
     }
 }

@@ -15,6 +15,11 @@ class TransactionRepository(
         private val mintTransactionFactory: MintTransactionFactory,
         private val categorizedTransactionFactory: CategorizedTransactionFactory) {
 
+    fun addCategorizedTransactionRow(categorizedTransaction: CategorizedTransaction) {
+        val singleRowList = listOf(categorizedTransaction.toGoogleSheetRowList())
+        googleSheetClient.writeAllValuesToTab(TabName.CATEGORIZED_TRANSACTIONS, singleRowList)
+    }
+
     fun listAllMintTransactions(): List<MintTransaction> {
         val recordsInTab = googleSheetClient.listValuesInTab(TabName.MINT_TRANSACTIONS)
         if (recordsInTab.isEmpty()) {
