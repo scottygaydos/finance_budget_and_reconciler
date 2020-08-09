@@ -6,9 +6,11 @@ import net.inherency.finances.domain.account.AccountService
 import net.inherency.finances.domain.account.AccountService.Companion.GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME
 import net.inherency.finances.domain.budget.category.BudgetCategoryData
 import net.inherency.finances.domain.budget.category.BudgetCategoryService
-import net.inherency.finances.domain.transaction.CreditOrDebit
+import net.inherency.finances.domain.reconcile.rule.BudgetCategoryRule
+import net.inherency.finances.domain.reconcile.rule.BudgetCategoryRuleService
 import net.inherency.finances.domain.transaction.MintTransaction
 import net.inherency.finances.domain.transaction.TransactionService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,11 +18,15 @@ class RemainingMintTransactionsService(
         private val accountService: AccountService,
         private val commandLineService: CommandLineService,
         private val transactionService: TransactionService,
-        private val budgetCategoryService: BudgetCategoryService) {
+        private val budgetCategoryService: BudgetCategoryService,
+        private val budgetCategoryRuleService: BudgetCategoryRuleService,
+        private val debitAndCreditAccountFactory: DebitAndCreditAccountFactory) {
 
     companion object {
         val AFFIRMATIVE_ANSWERS = listOf("y", "yes", "true")
     }
+
+    private val log = LoggerFactory.getLogger(RemainingMintTransactionsService::class.java)
 
     fun promptAndHandleRemainingMintTransactions(remainingMintTransactions: List<MintTransaction>) {
 
@@ -35,16 +41,33 @@ class RemainingMintTransactionsService(
         remainingMintTransactions.forEach { mintTx ->
             val mintAccount = findAccountByMintAccountName(accounts, mintTx)
             val (creditAccount, debitAccount) =
-                    determineDebitAndCreditAccounts(mintTx, mintAccount, globalExternalAccount)
-
-            println(mintTx)
-            println("Do you want to add this transaction?  To confirm enter one of the following: $AFFIRMATIVE_ANSWERS")
-            val doAddTransactionInput = commandLineService.readFromCommandLine()
-            if (AFFIRMATIVE_ANSWERS.map { it.toLowerCase() }.contains(doAddTransactionInput.toLowerCase())) {
-                val inputOption = selectInputOption(budgetCategories)
-                createCategorizedTransaction(creditAccount, debitAccount, mintTx, inputOption)
+                    determineCreditAndDebitAccounts(mintTx, mintAccount, globalExternalAccount)
+            val matchingRule = budgetCategoryRuleService.findMatchingRuleForAutoCategorization(mintTx)
+            if (matchingRule != null) {
+                createTransactionFromRule(matchingRule, creditAccount, debitAccount, mintTx)
+            } else {
+                val response = askToCategorizeTransaction(mintTx)
+                if (AFFIRMATIVE_ANSWERS.map { it.toLowerCase() }.contains(response.toLowerCase())) {
+                    val inputOption = selectInputOption(budgetCategories)
+                    createCategorizedTransaction(creditAccount, debitAccount, mintTx, inputOption)
+                }
             }
         }
+    }
+
+    private fun askToCategorizeTransaction(mintTx: MintTransaction): String {
+        log.info(mintTx.toString())
+        log.info("Do you want to add this transaction?  To confirm enter one of the following: $AFFIRMATIVE_ANSWERS")
+        return commandLineService.readFromCommandLine()
+    }
+
+    private fun createTransactionFromRule(matchingRule: BudgetCategoryRule, creditAccount: Account, debitAccount: Account, mintTx: MintTransaction) {
+        val creditAccountForRule = matchingRule.creditAccount ?: creditAccount
+        val debitAccountForRule = matchingRule.debitAccount ?: debitAccount
+        log.info("Creating transaction based on rule...")
+        log.info("Transaction: $mintTx")
+        log.info("Rule: $matchingRule")
+        createCategorizedTransaction(creditAccountForRule, debitAccountForRule, mintTx, matchingRule.category)
     }
 
     private fun createCategorizedTransaction(
@@ -55,9 +78,9 @@ class RemainingMintTransactionsService(
     }
 
     private fun selectInputOption(budgetCategories: List<BudgetCategoryData>): BudgetCategoryData {
-        println("Please input transaction category.  Input options...")
+        log.info("Please input transaction category.  Input options...")
         budgetCategories.forEach {
-            println("${it.id} = ${it.name}")
+            log.info("${it.id} = ${it.name}")
         }
 
         //TODO: Remove this hard-coding of shortcut options for some kind of external mapping
@@ -67,7 +90,7 @@ class RemainingMintTransactionsService(
         )
         shortCuts.forEach { (k, v) ->
             if (v != null) {
-                println("$k = ${v.name}")
+                log.info("$k = ${v.name}")
             }
         }
 
@@ -77,25 +100,15 @@ class RemainingMintTransactionsService(
                     ?: budgetCategories.firstOrNull { chosenOption.toInt() == it.id }
                     ?: error("Could not find valid matching input option.")
         } catch (e: Exception) {
-            e.printStackTrace()
-            println("Error!  Please input a valid option.")
+            log.error("Error!  Please input a valid option.", e)
             selectInputOption(budgetCategories)
         }
     }
 
-    private fun determineDebitAndCreditAccounts(mintTx: MintTransaction, mintAccount: Account,
+    private fun determineCreditAndDebitAccounts(mintTx: MintTransaction, mintAccount: Account,
                                                 globalExternalAccount: Account): Pair<Account, Account> {
-        return when (mintTx.creditOrDebit) {
-            CreditOrDebit.CREDIT -> {
-                Pair(mintAccount, globalExternalAccount)
-            }
-            CreditOrDebit.DEBIT -> {
-                Pair(globalExternalAccount, mintAccount)
-            }
-            CreditOrDebit.UNKNOWN -> {
-                throw IllegalArgumentException("Please review mint tx for credit/debit status: $mintTx")
-            }
-        }
+        return debitAndCreditAccountFactory.determineCreditAndDebitAccounts(
+                mintTx, mintAccount, globalExternalAccount)
     }
 
     private fun findAccountByMintAccountName(accounts: List<Account>, mintTx: MintTransaction) =
