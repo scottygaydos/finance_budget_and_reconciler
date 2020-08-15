@@ -8,6 +8,8 @@ import net.inherency.finances.domain.account.AccountService.Companion.GLOBAL_EXT
 import net.inherency.finances.domain.budget.category.BudgetCategoryData
 import net.inherency.finances.domain.budget.category.BudgetCategoryService
 import net.inherency.finances.domain.reconcile.RemainingMintTransactionsService.Companion.AFFIRMATIVE_ANSWERS
+import net.inherency.finances.domain.reconcile.rule.BudgetCategoryRule
+import net.inherency.finances.domain.reconcile.rule.BudgetCategoryRuleService
 import net.inherency.finances.domain.transaction.CreditOrDebit
 import net.inherency.finances.domain.transaction.MintTransaction
 import net.inherency.finances.domain.transaction.TransactionService
@@ -20,9 +22,12 @@ class RemainingMintTransactionsServiceTest {
     private val commandLineService: CommandLineService = mock()
     private val transactionService: TransactionService = mock()
     private val budgetCategoryService: BudgetCategoryService = mock()
+    private val budgetCategoryRuleService: BudgetCategoryRuleService = mock()
+    private val debitAndCreditAccountFactory: DebitAndCreditAccountFactory = DebitAndCreditAccountFactory()
 
     private val remainingMintTransactionsService = RemainingMintTransactionsService(
-            accountService, commandLineService, transactionService, budgetCategoryService
+            accountService, commandLineService, transactionService, budgetCategoryService, budgetCategoryRuleService,
+            debitAndCreditAccountFactory
     )
 
     @Test
@@ -162,6 +167,39 @@ class RemainingMintTransactionsServiceTest {
                 creditCardAccount, remainingMintTransactionTwo, spendingCategory)
         verify(transactionService, times(0)).createCategorizedTransactionFromMintTransaction(
                 globalExternalAccountToCredit, creditCardAccount, remainingMintTransactionOne, spendingCategory)
+    }
+
+    @Test
+    fun `Given one remaining mint transaction and all configurations are available and match, when the system checks the rules and finds a match, the  system categorizes the transaction automatically`() {
+        //GIVEN:
+        //A matching account to debit and the global external account to credit can be found
+        val checkingAccount = Account(1, "Checking", "Checking Account", "Checking", "",
+                canManuallyCredit = true, canManuallyDebit = true)
+        val globalExternalAccount = Account(2, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME,
+                "Generic account to represent other parties", GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "",
+                canManuallyCredit = true, canManuallyDebit = true)
+        whenever(accountService.readAll()).thenReturn(listOf(checkingAccount, globalExternalAccount))
+
+        //The system finds a matching rule for the transaction and category
+        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category")
+        whenever(budgetCategoryService.readAll()).thenReturn(listOf(spendingCategory))
+        whenever(budgetCategoryRuleService.findMatchingRuleForAutoCategorization(any())).thenReturn(BudgetCategoryRule(
+                spendingCategory, checkingAccount, globalExternalAccount))
+
+        //One remaining mint transaction
+        val remainingMintTransaction = MintTransaction(LocalDate.of(2020, 8, 4), "Refund", "Purchase Refund", 1200,
+                CreditOrDebit.CREDIT, "Shopping", "Checking")
+        val remainingMintTransactions = listOf(remainingMintTransaction)
+
+        //WHEN
+        remainingMintTransactionsService.promptAndHandleRemainingMintTransactions(remainingMintTransactions)
+
+        //THEN
+        verify(transactionService).createCategorizedTransactionFromMintTransaction(globalExternalAccount,
+                checkingAccount, remainingMintTransaction, spendingCategory)
+
+        //No input was required
+        verifyZeroInteractions(commandLineService)
     }
 
 }
