@@ -62,5 +62,4 @@ class BudgetRepositoryTest {
             assertEquals(expectedResult, firstValue)
         }
     }
-
 }
