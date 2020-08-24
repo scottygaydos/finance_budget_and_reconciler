@@ -1,0 +1,20 @@
+package net.inherency.finances.controller
+
+import net.inherency.finances.domain.bill.BillData
+import net.inherency.finances.domain.bill.BillService
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+@RestController
+@RequestMapping("ws/bills")
+class BillController(private val billService: BillService) {
+
+    //TODO: Create integration test for this
+    @GetMapping(value = ["/"], produces = [APPLICATION_JSON_VALUE])
+    fun reportAllBillsReportableViaUI(): List<BillData> {
+        return billService.findAllBillsReportableViaUI()
+    }
+
+}

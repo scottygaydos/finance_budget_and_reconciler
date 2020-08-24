@@ -2,6 +2,7 @@ package net.inherency.finances.external.google
 
 enum class TabName {
     ACCOUNTS,
+    BILLS,
     BUDGET_CATEGORIES,
     BUDGET_CATEGORY_RULES,
     BUDGET_TEMPLATE,
