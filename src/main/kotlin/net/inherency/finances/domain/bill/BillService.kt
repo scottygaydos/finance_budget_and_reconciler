@@ -1,5 +1,6 @@
 package net.inherency.finances.domain.bill
 
+import net.inherency.finances.controller.dto.BillDTO
 import net.inherency.finances.controller.dto.BillReportDTO
 import net.inherency.finances.domain.transaction.TransactionService
 import net.inherency.finances.objectIsUnique
@@ -9,33 +10,43 @@ import java.time.LocalDate
 @Service
 class BillService(private val billRepository: BillRepository, private val transactionService: TransactionService) {
 
-    fun findAllBillsReportableViaUI(): List<BillReportDTO> {
+    fun findAllBillsReportableViaUI(): BillReportDTO {
         val bills = billRepository
                 .readAll()
                 .filter { it.showInUIReports }
         validateBillEntries(bills)
 
-        return findLastPaidDateForBills(bills).mapNotNull { (bill, lastPaymentDate) ->
-            lastPaymentDate?.let {
-                BillReportDTO(
-                        bill.accountId,
-                        bill.name,
-                        bill.description,
-                        bill.dueDayOfMonth,
-                        bill.autoPayEnabled,
-                        lastPaymentDate)
-            }
-        }
+        return BillReportDTO(
+                findLastPaymentInfoForBills(bills).mapNotNull { (bill, lastPaymentDateAndAmount) ->
+                    lastPaymentDateAndAmount?.let {
+                        BillDTO(
+                                bill.name,
+                                bill.dueDayOfMonth,
+                                lastPaymentDateAndAmount.first,
+                                lastPaymentDateAndAmount.second,
+                                bill.autoPayEnabled,
+                                bill.description
+                        )
+                    }
+                }
+        )
     }
 
-    private fun findLastPaidDateForBills(bills: List<BillData>): Map<BillData, LocalDate?> {
+    private fun findLastPaymentInfoForBills(bills: List<BillData>): Map<BillData, Pair<LocalDate, Int>?> {
         return transactionService.listAllCategorizedTransactions()
                 .filter { bills.map { bill -> bill.accountId }.contains(it.creditAccountId) }
                 .groupBy { it.creditAccountId }
                 .mapKeys { bills.first { bill -> bill.accountId == it.key } }
                 .mapValues { txs ->
-                    txs.value.maxBy { it.date }?.date }
-
+                    txs.value.maxBy { it.date } }
+                .mapValues { tx ->
+                    if (tx.value == null) {
+                        null
+                    }
+                    else {
+                        Pair(tx.value!!.date, tx.value!!.settledAmount)
+                    }
+                }
     }
 
     private fun validateBillEntries(bills: List<BillData>) {

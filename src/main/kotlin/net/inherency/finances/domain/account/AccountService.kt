@@ -1,5 +1,6 @@
 package net.inherency.finances.domain.account
 
+import net.inherency.finances.controller.dto.AccountDTO
 import org.springframework.stereotype.Service
 
 @Service
@@ -7,6 +8,20 @@ class AccountService(private val accountRepository: AccountRepository) {
 
     companion object {
         const val GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME = "Global External Account"
+    }
+
+    fun readAllCreditableAccounts(): List<AccountDTO> {
+        return readAllAccountsMeetingCondition { it.canManuallyCredit }
+    }
+
+    fun readAllDebitableAccounts(): List<AccountDTO> {
+        return readAllAccountsMeetingCondition { it.canManuallyDebit }
+    }
+
+    private fun readAllAccountsMeetingCondition(filterFunction: (account: Account) -> Boolean): List<AccountDTO> {
+        return readAll()
+                .filter { filterFunction.invoke(it) }
+                .map { AccountDTO(it.id, it.name, "") }
     }
 
     fun readAll(): List<Account> {

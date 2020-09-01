@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController
 class BillController(private val billService: BillService) {
 
     //TODO: Create integration test for this
-    @GetMapping(value = ["/"], produces = [APPLICATION_JSON_VALUE])
-    fun reportAllBillsReportableViaUI(): List<BillReportDTO> {
+    @GetMapping(value = ["report"], produces = [APPLICATION_JSON_VALUE])
+    fun generateBillReport(): BillReportDTO {
         return billService.findAllBillsReportableViaUI()
     }
 
