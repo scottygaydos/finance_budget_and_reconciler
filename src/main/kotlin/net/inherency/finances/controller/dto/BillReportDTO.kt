@@ -1,12 +1,8 @@
 package net.inherency.finances.controller.dto
 
-import java.time.LocalDate
+data class BillReportDTO (val billPayments: List<BillDTO>) {
 
-data class BillReportDTO (
-        val accountId: Int,
-        val name: String,
-        val description: String,
-        val dueDayOfMonth: Int,
-        val autoPayEnabled: Boolean,
-        val lastDatePaid: LocalDate
-)
+    @Suppress("unused")
+    private val balanceRemainingBills: List<Any>
+        get() { return emptyList() }
+}

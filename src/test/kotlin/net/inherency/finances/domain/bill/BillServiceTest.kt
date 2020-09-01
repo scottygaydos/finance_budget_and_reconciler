@@ -2,6 +2,7 @@ package net.inherency.finances.domain.bill
 
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
+import net.inherency.finances.controller.dto.BillDTO
 import net.inherency.finances.controller.dto.BillReportDTO
 import net.inherency.finances.domain.transaction.CategorizedTransaction
 import net.inherency.finances.domain.transaction.TransactionService
@@ -55,10 +56,15 @@ class BillServiceTest {
 
         val result = billService.findAllBillsReportableViaUI()
 
-        val expectedResultList = billPaymentInfo.map {
-            BillReportDTO(it.key.accountId, it.key.name, it.key.description, it.key.dueDayOfMonth,
-                    it.key.autoPayEnabled, it.value)
-        }
+        val expectedResultList = BillReportDTO(billPaymentInfo.map {
+            BillDTO(
+                    billName = it.key.name,
+                    description = it.key.description,
+                    dueDayOfMonth = it.key.dueDayOfMonth,
+                    autoPayEnabled = it.key.autoPayEnabled,
+                    lastPaymentDate = it.value,
+                    amountPaid = 101)
+        })
 
         assertEquals(expectedResultList, result)
     }
@@ -110,10 +116,15 @@ class BillServiceTest {
 
         val result = billService.findAllBillsReportableViaUI()
 
-        val expectedResultList = billPaymentInfo.map {
-            BillReportDTO(it.key.accountId, it.key.name, it.key.description, it.key.dueDayOfMonth,
-                    it.key.autoPayEnabled, it.value)
-        }
+        val expectedResultList = BillReportDTO(billPaymentInfo.map {
+            BillDTO(
+                    billName = it.key.name,
+                    description = it.key.description,
+                    dueDayOfMonth = it.key.dueDayOfMonth,
+                    autoPayEnabled = it.key.autoPayEnabled,
+                    lastPaymentDate = it.value,
+                    amountPaid = 101)
+        })
         assertEquals(expectedResultList, result)
     }
 
@@ -152,10 +163,15 @@ class BillServiceTest {
 
         val result = billService.findAllBillsReportableViaUI()
 
-        val expectedResultList = billPaymentInfo.map {
-            BillReportDTO(it.key.accountId, it.key.name, it.key.description, it.key.dueDayOfMonth,
-                    it.key.autoPayEnabled, mostRecentTransactionDate)
-        }
+        val expectedResultList = BillReportDTO(billPaymentInfo.map {
+            BillDTO(
+                    billName = it.key.name,
+                    description = it.key.description,
+                    dueDayOfMonth = it.key.dueDayOfMonth,
+                    autoPayEnabled = it.key.autoPayEnabled,
+                    lastPaymentDate = mostRecentTransactionDate,
+                    amountPaid = 101)
+        })
 
         assertEquals(expectedResultList, result)
     }
