@@ -1,0 +1,48 @@
+<div>
+
+    <h3>Bills</h3>
+
+    <h4>Last Payment Report</h4>
+    <table border="1px">
+        <tr>
+            <th>Bill</th>
+            <th>Due Date</th>
+            <th>Last Payment Date</th>
+            <th>Amount Paid</th>
+        </tr>
+        <tr ng-repeat="billPayment in billReport.billPayments | orderBy:'lastPaymentDate':true" data-ng-class="{ autoPayHighlight: billPayment.autoPay }"> <!-- orderBy :true = reverse -->
+
+            <td>{{ billPayment.billName }}</td>
+            <td>{{ billPayment.dueDayOfMonth }}</td>
+            <td>{{ billPayment.lastPaymentDate }}</td>
+            <td>{{ (billPayment.amountPaid / 100) | currency }}</td>
+        </tr>
+    </table>
+
+    <br /><br />
+
+    <!--<h4>Remaining Bill Balance Report</h4>
+    <table border="1px">
+        <tr>
+            <th>Bill</th>
+            <th>Total Remaining Balance</th>
+            <th>My Portion of the Remaining Balance</th>
+            <th>Total Monthly Payment</th>
+            <th>My Portion of the Monthly Payment</th>
+            <th>Estimated Final Due Date</th>
+        </tr>
+        <tr ng-repeat="balanceRemainingBill in billReport.balanceRemainingBills">
+            <td>{{ balanceRemainingBill.billName }}</td>
+            <td>{{ (balanceRemainingBill.totalRemainingBalance / 100) | currency }}</td>
+            <td>{{ (balanceRemainingBill.myRemainingBalance / 100) | currency }}</td>
+            <td>{{ (balanceRemainingBill.totalMonthlyPayment / 100) | currency }}</td>
+            <td>{{ (balanceRemainingBill.myMonthlyPayment / 100) | currency }}</td>
+            <td>{{ balanceRemainingBill.estimatedFinalDueDate }}</td>
+        </tr>
+    </table> -->
+
+    <p></p>
+    {{ error }}
+
+
+</div>

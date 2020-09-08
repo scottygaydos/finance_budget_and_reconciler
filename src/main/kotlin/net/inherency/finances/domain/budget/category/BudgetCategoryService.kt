@@ -1,12 +1,18 @@
 package net.inherency.finances.domain.budget.category
 
+import net.inherency.finances.controller.dto.BudgetCategoryDTO
 import net.inherency.finances.objectIsUnique
 import org.springframework.stereotype.Service
 
 @Service
 class BudgetCategoryService(private val budgetCategoryRepository: BudgetCategoryRepository) {
 
-    @Suppress("unused")
+    fun reportAll(): List<BudgetCategoryDTO> {
+        return readAll().map {
+            BudgetCategoryDTO(it.id, it.name)
+        }
+    }
+
     fun readAll(): List<BudgetCategoryData> {
         val categories = budgetCategoryRepository.readAll()
         validateCategories(categories)

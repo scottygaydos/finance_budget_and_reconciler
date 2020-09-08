@@ -1,0 +1,43 @@
+<script  type="text/javascript">
+
+</script>
+
+<div>
+    <form id="createTxForm" name="createTxForm" ng-submit="submit()">
+        <label>Date
+            <input type="date" name="txDate" ng-model="selectedTxDate"  placeholder="yyyy-MM-dd" required />
+        </label><br /><br />
+
+        <label>Credit Account
+            <select ng-model="selectedCreditAccountId" ng-options="creditableAccount.account_id as creditableAccount.account_name for creditableAccount in creditableAccounts" required></select>
+        </label><br /><br />
+
+        <label>Debit Account
+            <select ng-model="selectedDebitAccountId" ng-options="debitableAccount.account_id as debitableAccount.account_name for debitableAccount in debitableAccounts" required></select>
+        </label><br /><br />
+
+        <label>Transaction Type
+            <select ng-model="selectedTransactionTypeId" ng-options="transactionType.transaction_type_id as transactionType.name for transactionType in transactionTypes" required></select>
+        </label><br /><br />
+
+        <label>Description
+            <input ng-model="selectedTxDescription" type="text" name="txDescription" required>
+        </label><br /><br />
+
+        <label>Authorized Amount
+            <input ng-model="selectedTxAuthAmount" type="text" name="txAuthAmount" id="txAuthAmount" required />
+        </label><br /><br />
+
+        <label>Settled Amount
+            <input ng-model="selectedTxSettledAmount" type="text" name="txSettledAmount" id="txSettledAmount" />
+        </label><br /><br />
+
+        <label>Can This Transaction Reconcile?
+            <input ng-model="selectedTxCanReconcile" type="checkbox" name="txCanReconcile"  />
+        </label><br /><br />
+
+        <input type="submit" id="submit" value="Submit" />
+
+    </form>
+
+</div>

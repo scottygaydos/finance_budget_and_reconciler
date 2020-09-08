@@ -5,8 +5,10 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import net.inherency.finances.controller.dto.CreateBudgetForMonthAndYearFromTemplateCmd
+import net.inherency.finances.domain.budget.category.BudgetCategoryService
 import net.inherency.finances.domain.budget.template.BudgetTemplateData
 import net.inherency.finances.domain.budget.template.BudgetTemplateService
+import net.inherency.finances.domain.transaction.TransactionService
 import org.junit.jupiter.api.*
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
@@ -23,10 +25,16 @@ class BudgetServiceTest {
     @Mock
     private lateinit var budgetRepository: BudgetRepository
 
+    @Mock
+    private lateinit var transactionService: TransactionService
+
+    @Mock
+    private lateinit var budgetCategoryService: BudgetCategoryService
+
     @BeforeEach
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        budgetService = BudgetService(budgetTemplateService, budgetRepository)
+        budgetService = BudgetService(budgetTemplateService, budgetRepository, transactionService, budgetCategoryService)
     }
 
     @Test

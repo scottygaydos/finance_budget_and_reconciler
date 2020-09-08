@@ -1,0 +1,35 @@
+<div>
+    <h3>Transactions</h3>
+    <h4>Filter: <input type="text" ng-model="generalFilter"></h4>
+    <table border="1px" id="txTable">
+        <tr>
+            <th>Date</th>
+            <th>Debit Account</th>
+            <th>Credit Account</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Auth Amt</th>
+            <th>Settled Amt</th>
+            <th>Report Amt</th>
+            <th>Credit or Debit?</th>
+            <th>Can Reconcile</th>
+
+        </tr>
+        <tr ng-repeat="tx in transactions | filter:generalFilter">
+            <td>{{ tx.transaction_date }}</td>
+            <td>{{ tx.debit_account_name }}</td>
+            <td>{{ tx.credit_account_name }}</td>
+            <td>{{ tx.category }}</td>
+            <td>{{ tx.description }}</td>
+            <td>{{ (tx.authorized_amount / 100) | number:2  }}</td>
+            <td>{{ (tx.settled_amount / 100) | number:2 }}</td>
+            <td>{{ (tx.settled_amount / 100 * tx.percentage / 100) | number:2}}</td>
+            <td>{{ tx.credit_or_debit}}</td>
+            <td>{{ tx.can_reconcile  }}</td>
+        </tr>
+    </table>
+    <p></p>
+    {{ error }}
+
+
+</div>
