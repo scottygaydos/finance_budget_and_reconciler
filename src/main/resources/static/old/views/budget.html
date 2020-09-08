@@ -1,0 +1,67 @@
+<div>
+
+    <h3>Budget <a href="#/add_budget_for_month/">Add New Budget Month</a></h3>
+    <form id="budgetForm" name="budgetForm" ng-submit="submit()">
+        <label for "budgetMonthPicker">Month:</label><input id="monthPicker" type="number" value={{budgetMonth}} ng-model="budgetMonth" min="1" max="12" />
+        <label for "budgetYearPicker">Year:</label><input id="yearPicker" type="number" value={{budgetYear}} ng-model="budgetYear" min="2015" max="2070" />
+        <input type="submit" id="submit" value="Update Report" />
+    </form>
+    <br />
+
+    <table border="1px">
+        <tr>
+            <th>Category</th>
+            <th>Budget</th>
+            <th>Remaining</th>
+        </tr>
+        <tr ng-repeat="category in budgetObject.transactionTypeReports | objectToArray | orderBy:'sortOrderValue'">
+            <td>{{ category.transactionTypeName }}</td>
+            <td>{{ (category.budgetAmount / 100) | currency }}</td>
+            <td>{{ (category.remainingAmount / 100) | currency }}</td>
+        </tr>
+        <tr>
+            <td>Total</td>
+            <td>{{ (budgetObject.totalBudget / 100) | currency }}</td>
+            <td>{{ (budgetObject.totalRemainingBudget / 100) | currency }}</td>
+        </tr>
+    </table>
+
+    <br /><br />
+
+    <div ng-show="budgetObject.totalRemainingBudget > 0 && budgetMonth != currentMonth">
+        <form id="moveBudgetForwardForm" name="moveBudgetForwardForm" ng-submit="moveBudgetForward()">
+            <input type="submit" id="submitMoveBudgetForwardForm" value="Move Budget Forward" />
+        </form>
+    </div>
+
+    <br />
+
+    <div ng-show="budgetObject.discrepancyBetweenTotalBudgetAndPaychecks != 0">
+        <b><u>There is a budget difference of {{(budgetObject.discrepancyBetweenTotalBudgetAndPaychecks) / 100 | currency}}.  Fix it by adjusting a category?</u></b><br />
+        <form id="fixBudgetForm" name="fixBudgetForm" ng-submit="fixBudgetToMatchDeposits()">
+            <label>Category
+                <select ng-model="selectedTransactionTypeId" ng-options="transactionType.transaction_type_id as transactionType.name for transactionType in transactionTypes"></select>
+            </label>
+            <input type="submit" id="submitFixForm" value="Submit" />
+        </form>
+    </div>
+
+    <br />
+
+    Paycheck total for last month: {{ (budgetObject.totalPaychecksPreviousMonth / 100) | currency }} <br />
+    <table border = "1px">
+        <tr>
+            <th>Date</th>
+            <th>Amount</th>
+        </tr>
+        <tr ng-repeat="check in budgetObject.paychecksPreviousMonthArray | orderBy: 'date'">
+            <td>{{ check.date }}</td>
+            <td>{{ (check.amount / 100) | currency }}</td>
+        </tr>
+    </table>
+
+    <p></p>
+    {{ error }}
+
+
+</div>
