@@ -9,6 +9,7 @@ import net.inherency.finances.domain.budget.category.BudgetCategoryService
 import net.inherency.finances.domain.budget.template.BudgetTemplateData
 import net.inherency.finances.domain.budget.template.BudgetTemplateService
 import net.inherency.finances.domain.transaction.TransactionService
+import net.inherency.finances.util.DateTimeService
 import org.junit.jupiter.api.*
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
@@ -31,10 +32,14 @@ class BudgetServiceTest {
     @Mock
     private lateinit var budgetCategoryService: BudgetCategoryService
 
+    @Mock
+    private lateinit var dateTimeService: DateTimeService
+
     @BeforeEach
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        budgetService = BudgetService(budgetTemplateService, budgetRepository, transactionService, budgetCategoryService)
+        budgetService = BudgetService(
+                budgetTemplateService, budgetRepository, transactionService, budgetCategoryService, dateTimeService)
     }
 
     @Test
