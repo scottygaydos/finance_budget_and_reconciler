@@ -78,6 +78,10 @@ class TransactionService(
         transactionRepository.addCategorizedTransactionRow(categorizedTransaction)
     }
 
+    fun create(categorizedTransaction: CategorizedTransaction) {
+        transactionRepository.addCategorizedTransactionRow(categorizedTransaction)
+    }
+
     fun reportAllCategorizedTransactionsAfter(cutoffDate: LocalDate = dateTimeService.now().minusDays(91)) :
             List<TransactionDTO> {
         val categories = budgetCategoryService.readAll()
