@@ -13,7 +13,7 @@ import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import kotlin.test.assertEquals
 
-class BudgetRepositoryTest {
+class BudgetRepositoryGoogleSheetImplTest {
 
     private lateinit var budgetRepository: BudgetRepository
 
@@ -23,7 +23,7 @@ class BudgetRepositoryTest {
     @BeforeEach
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        budgetRepository = BudgetRepository(googleSheetClient)
+        budgetRepository = BudgetRepositoryGoogleSheetImpl(googleSheetClient)
     }
 
     @Test

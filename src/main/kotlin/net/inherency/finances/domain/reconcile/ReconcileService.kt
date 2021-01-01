@@ -15,6 +15,12 @@ class ReconcileService(
 
     companion object {
         const val DAYS_TO_TEST_FORWARD_AND_BACKWARD = 5L
+
+        data class ReconcileResult (
+                val reconciledTransactions: Map<CategorizedTransaction, MintTransaction>,
+                val unreconciledMintTransactions: List<MintTransaction>,
+                val unreconciledCategorizedTransactions: List<CategorizedTransaction>
+        )
     }
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -112,16 +118,10 @@ class ReconcileService(
         }
     }
 
-}
+    private class ReconcileResultAccumulator {
+        var reconciledTransactions: MutableMap<CategorizedTransaction, MintTransaction> = mutableMapOf()
+        var unreconciledCategorizedTransactions: MutableList<CategorizedTransaction> = mutableListOf()
+        var unreconciledMintTransactions: List<MintTransaction> = emptyList()
+    }
 
-private class ReconcileResultAccumulator {
-    var reconciledTransactions: MutableMap<CategorizedTransaction, MintTransaction> = mutableMapOf()
-    var unreconciledCategorizedTransactions: MutableList<CategorizedTransaction> = mutableListOf()
-    var unreconciledMintTransactions: List<MintTransaction> = emptyList()
 }
-
-data class ReconcileResult (
-        val reconciledTransactions: Map<CategorizedTransaction, MintTransaction>,
-        val unreconciledMintTransactions: List<MintTransaction>,
-        val unreconciledCategorizedTransactions: List<CategorizedTransaction>
-)

@@ -39,6 +39,7 @@ class BudgetController(private val budgetService: BudgetService,
     }
 
     //TODO: Delete this once I transition fully to new front end.
+    @Suppress("UNUSED_PARAMETER")
     @PostMapping(value = ["fix_month_to_match_deposits"], consumes = ["application/x-www-form-urlencoded"])
     fun fixMonthToMatchDeposits(
             @RequestParam("budget_month") budgetMonth: Int,
@@ -57,6 +58,7 @@ class BudgetController(private val budgetService: BudgetService,
     }
 
     //TODO: Delete this once I transition fully to new front end.
+    @Suppress("UNUSED_PARAMETER")
     @PostMapping(value = ["move_remainder_to_next_month"], consumes = ["application/x-www-form-urlencoded"])
     fun moveRemainderToNextMonth(
             @RequestParam("budget_month") budgetMonth: Int,
