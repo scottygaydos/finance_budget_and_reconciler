@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
-class BillRepositoryTest {
+class BillRepositoryGoogleSheetImplTest {
 
     private lateinit var billRepository: BillRepository
 
@@ -19,7 +19,7 @@ class BillRepositoryTest {
     @BeforeEach
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        billRepository = BillRepository(googleSheetClient)
+        billRepository = BillRepositoryGoogleSheetImpl(googleSheetClient)
     }
 
     @Test
