@@ -130,8 +130,10 @@ class BudgetService(
         val allTransactions = transactionService.listAllCategorizedTransactions()
         val txsByBudgetCategoryId = allTransactions
                 .filter { YearMonth.from(it.date) == YearMonth.of(budgetYearLocal, budgetMonthLocal) }
+                .filterNot { it.creditAccountId == 100200 && it.debitAccountId == 2} //TODO: Handle this with configuration somehow
+                .filterNot { it.debitAccountId == 100200 && it.creditAccountId == 2} //TODO: Handle this with configuration somehow
                 .groupBy { it.budgetCategoryId }
-                .mapValues { mapEntry -> mapEntry.value.map { it.settledAmount }.sum() }
+                .mapValues { mapEntry -> mapEntry.value.map { calculateAmount(it) }.sum() }
         val budgetCategoryReports = budgetRepository.readAll()
                 .filter { it.month == budgetMonthLocal && it.year == budgetYearLocal }
                 .map { budget ->
@@ -162,6 +164,24 @@ class BudgetService(
                 discrepancyBetweenTotalBudgetAndPaychecks = totalPaychecksPreviousMonth - totalBudget
         )
 
+    }
+
+    //TODO: Add property to account for this
+    private fun calculateAmount(it: CategorizedTransaction): Int {
+        val creditAccountsToReverse = listOf(1, 3, 4, 25, 28, 29, 30, 100000, 100100, 100200)
+        val amount =  if (isSharedAccountEntry(it)) it.settledAmount / 2 else it.settledAmount
+        return if (creditAccountsToReverse.contains(it.creditAccountId)) -amount else amount
+    }
+
+
+    //TODO: Add property to account for this
+    private fun isSharedAccountEntry(entry: CategorizedTransaction): Boolean {
+        if (entry.debitAccountId == 100000) {
+            return true
+        } else if (entry.creditAccountId == 100000) {
+            return true
+        }
+        return false
     }
 
     private fun validateYearAndMonthParameters(year: Int, month: Int) {

@@ -24,7 +24,11 @@ class TransactionService(
         private val accountService: AccountService) {
 
     fun updateMintTransactions(): List<MintTransaction> {
-        val sortedMintTransactions = mintClient.downloadAllTransactions().sortedByDescending { it.date }
+        val sortedMintTransactions = mintClient.downloadAllTransactions()
+            .filterNot { it.accountName == "INDIVIDUAL - TOD" } //TODO: Handle this with configuration somehow
+            .filterNot { it.accountName == "ONPREM 401k" } //TODO: Handle this with configuration somehow
+            .filterNot { it.accountName == "CHASE AUTO ACCOUNT" } //TODO: Handle this with configuration somehow
+            .sortedByDescending { it.date }
         transactionRepository.clearAllExistingMintTransactions()
         val headerRow = MintFileParser.HEADER_LINE_VALUES.toMutableList()
         transactionRepository.writeHeaderAndAllTransactions(TabName.MINT_TRANSACTIONS, headerRow, sortedMintTransactions)

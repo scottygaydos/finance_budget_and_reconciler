@@ -12,6 +12,7 @@ import net.inherency.finances.domain.transaction.MintTransaction
 import net.inherency.finances.domain.transaction.TransactionService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class RemainingMintTransactionsService(
@@ -38,7 +39,9 @@ class RemainingMintTransactionsService(
         val globalExternalAccount = accounts.first { it.name == (GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME) }
         val budgetCategories = budgetCategoryService.readAll()
 
-        remainingMintTransactions.forEach { mintTx ->
+        remainingMintTransactions
+            .filter { it.date.isAfter(LocalDate.of(2021, 1, 31)) } //TODO: Should I remove this and back populate?
+            .forEach { mintTx ->
             val mintAccount = findAccountByMintAccountName(accounts, mintTx)
             val (creditAccount, debitAccount) =
                     determineCreditAndDebitAccounts(mintTx, mintAccount, globalExternalAccount)

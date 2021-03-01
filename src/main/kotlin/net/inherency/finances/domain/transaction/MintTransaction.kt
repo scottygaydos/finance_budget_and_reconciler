@@ -49,4 +49,12 @@ data class MintTransaction (
                 accountName
         )
     }
+
+    override fun toString(): String {
+        return "MintTransaction(date=$date, description='$description', originalDescription='$originalDescription', " +
+            System.lineSeparator() +
+                "amount=$amount, category='$category', accountName='$accountName, creditOrDebit=$creditOrDebit')"
+    }
+
+
 }
