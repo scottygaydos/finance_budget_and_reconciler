@@ -53,6 +53,35 @@ class BudgetCategoryRuleServiceTest {
     }
 
     @Test
+    fun `A transaction that matches a rule by ANY description and debit account will return the rule`() {
+        //GIVEN
+        val description = "This will be ignored"
+        val accountNameInMintTx = "Paypal Account"
+        val mintTx = MintTransaction(LocalDate.of(2020, 8, 9), description, "_",
+            123, CreditOrDebit.DEBIT, "", accountNameInMintTx)
+
+        val ruleDebitAccountId = 3
+        val ruleBudgetCategoryId = 16
+        val categoryName = "Non-Budget Transaction"
+        whenever(budgetCategoryRuleRepository.readAll()).thenReturn(listOf(
+            BudgetCategoryRuleData(description, null, ruleDebitAccountId, ruleBudgetCategoryId)
+        ))
+        whenever(accountService.readAll()).thenReturn(listOf(
+            Account(1, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
+            Account(ruleDebitAccountId, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+        ))
+        whenever(budgetCategoryService.readAll()).thenReturn(listOf(
+            BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Transaction that does not affect a budget")
+        ))
+
+        //WHEN
+        val rule = budgetCategoryRuleService.findMatchingRuleForAutoCategorization(mintTx)
+
+        //THEN
+        assertEquals(categoryName, rule?.category?.name)
+    }
+
+    @Test
     fun `A transaction that matches a rule by original description will return the rule`() {
         //GIVEN
         val originalDescription = "testOriginalDescriptionValue"
