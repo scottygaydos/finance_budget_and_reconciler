@@ -16,14 +16,29 @@ class BudgetCategoryRuleService(
         val rules = budgetCategoryRuleRepository
                 .readAll()
                 .filter { validateRuleOnlyRoutesOneAccount(it) }
-        val ruleMatch =  rules.firstOrNull { rule ->
+        val specificDescriptionRuleMatch =  rules.firstOrNull { rule ->
             ruleDescriptionDoesMatchTransaction(rule, mintTx)
         }
-        return validateRuleOrReturnNull(ruleMatch)
+        val anyDescriptionRuleMatch =
+            specificDescriptionRuleMatch ?:
+            rules.firstOrNull { rule ->
+                ruleDescriptionIsAnythingAndDebitAccountMatches(rule, mintTx)
+            }
+        return validateRuleOrReturnNull(anyDescriptionRuleMatch)
     }
 
     private fun ruleDescriptionDoesMatchTransaction(rule: BudgetCategoryRuleData, mintTx: MintTransaction) =
             rule.descriptionToMatch == mintTx.description || rule.descriptionToMatch == mintTx.originalDescription
+
+    private fun ruleDescriptionIsAnythingAndDebitAccountMatches(rule: BudgetCategoryRuleData, mintTx: MintTransaction)
+    : Boolean {
+        if (rule.descriptionToMatch == "*") {
+            val debitAccount = findAccount(rule.accountIdToDebit) ?: return false
+            return listOf(debitAccount.mintName, debitAccount.mintNameAlt).contains(mintTx.getDebitAccountName())
+        } else {
+            return false
+        }
+    }
 
     private fun validateRuleOnlyRoutesOneAccount(rule: BudgetCategoryRuleData) =
             (rule.accountIdToCredit != null && rule.accountIdToDebit == null)
