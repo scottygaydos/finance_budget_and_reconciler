@@ -56,6 +56,8 @@ class RemainingMintTransactionsService(
                 }
             }
         }
+
+        log.info("*** Reconciliation complete ***")
     }
 
     private fun askToCategorizeTransaction(mintTx: MintTransaction): String {
