@@ -8,6 +8,7 @@ import net.inherency.finances.external.parseMintFileLocalDate
 import org.openqa.selenium.By
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
+import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.File
@@ -21,6 +22,9 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
         const val FORM_EMAIL_INPUT = "Email"
         const val FORM_PASSWORD_INPUT = "Password"
         const val FORM_SIGN_IN_BUTTON = "SignIn"
+        const val EMAIL_ONLY_CSS_SELECTOR = "#ius-identifier"
+        const val PASSWORD_ONLY_CSS_SELECTOR = "#ius-sign-in-mfa-password-collection-current-password"
+        const val CONTINUE_AFTER_PASSWORD_CSS_SELECTOR = "#ius-sign-in-mfa-password-collection-continue-btn"
     }
 
     private val log = LoggerFactory.getLogger(MintClient::class.java)
@@ -110,9 +114,27 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     private fun completeSignInForm(driver: ChromeDriver) {
         val email = configs.getString(ConfigKey.MINT_LOGIN_EMAIL)
         val password = configs.getString(ConfigKey.MINT_LOGIN_PASSWORD)
-        driver.findElement(By.name(FORM_EMAIL_INPUT)).sendKeys(email)
-        driver.findElement(By.name(FORM_PASSWORD_INPUT)).sendKeys(password)
-        driver.findElement(By.name(FORM_SIGN_IN_BUTTON)).click()
+        try {
+            driver.findElement(By.name(FORM_EMAIL_INPUT)).sendKeys(email)
+            driver.findElement(By.name(FORM_PASSWORD_INPUT)).sendKeys(password)
+            driver.findElement(By.name(FORM_SIGN_IN_BUTTON)).click()
+        } catch (e: Exception) {
+            try {
+                log.info("Exception trying first input attempt... trying second method")
+                driver.findElementByCssSelector(EMAIL_ONLY_CSS_SELECTOR).sendKeys(email)
+                driver.findElement(By.name(FORM_SIGN_IN_BUTTON)).click()
+                WebDriverWait(driver, 10).until { webDriver -> webDriver.findElement(
+                    By.cssSelector(PASSWORD_ONLY_CSS_SELECTOR)) }
+                driver.findElementByCssSelector(PASSWORD_ONLY_CSS_SELECTOR)
+                    .sendKeys(password)
+                driver.findElementByCssSelector(CONTINUE_AFTER_PASSWORD_CSS_SELECTOR).click()
+            } catch (e2: Exception) {
+                log.error("Could not complete sign in for file download", e)
+                log.info("Please press Enter to continue...")
+                readLine()
+                throw e2
+            }
+        }
         log.info("Completed sign in with email = {} and password <...>", email)
     }
 
