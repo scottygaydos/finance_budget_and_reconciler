@@ -23,6 +23,9 @@ class BudgetCategoryRuleService(
             specificDescriptionRuleMatch ?:
             rules.firstOrNull { rule ->
                 ruleDescriptionIsAnythingAndDebitAccountMatches(rule, mintTx)
+            } ?:
+            rules.firstOrNull { rule ->
+                ruleDescriptionIsAnythingAndCreditAccountMatches(rule, mintTx)
             }
         return validateRuleOrReturnNull(anyDescriptionRuleMatch)
     }
@@ -35,6 +38,16 @@ class BudgetCategoryRuleService(
         if (rule.descriptionToMatch == "*") {
             val debitAccount = findAccount(rule.accountIdToDebit) ?: return false
             return listOf(debitAccount.mintName, debitAccount.mintNameAlt).contains(mintTx.getDebitAccountName())
+        } else {
+            return false
+        }
+    }
+
+    private fun ruleDescriptionIsAnythingAndCreditAccountMatches(rule: BudgetCategoryRuleData, mintTx: MintTransaction)
+            : Boolean {
+        if (rule.descriptionToMatch == "*") {
+            val creditAccount = findAccount(rule.accountIdToCredit) ?: return false
+            return listOf(creditAccount.mintName, creditAccount.mintNameAlt).contains(mintTx.getCreditAccountName())
         } else {
             return false
         }
