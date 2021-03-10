@@ -23,6 +23,7 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
         const val FORM_PASSWORD_INPUT = "Password"
         const val FORM_SIGN_IN_BUTTON = "SignIn"
         const val EMAIL_ONLY_CSS_SELECTOR = "#ius-identifier"
+        const val CONTINUE_AFTER_EMAIL_CSS_SELECTOR = "#ius-sign-in-submit-btn"
         const val PASSWORD_ONLY_CSS_SELECTOR = "#ius-sign-in-mfa-password-collection-current-password"
         const val CONTINUE_AFTER_PASSWORD_CSS_SELECTOR = "#ius-sign-in-mfa-password-collection-continue-btn"
     }
@@ -122,7 +123,7 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
             try {
                 log.info("Exception trying first input attempt... trying second method")
                 driver.findElementByCssSelector(EMAIL_ONLY_CSS_SELECTOR).sendKeys(email)
-                driver.findElement(By.name(FORM_SIGN_IN_BUTTON)).click()
+                driver.findElementByCssSelector(CONTINUE_AFTER_EMAIL_CSS_SELECTOR).click()
                 WebDriverWait(driver, 10).until { webDriver -> webDriver.findElement(
                     By.cssSelector(PASSWORD_ONLY_CSS_SELECTOR)) }
                 driver.findElementByCssSelector(PASSWORD_ONLY_CSS_SELECTOR)
