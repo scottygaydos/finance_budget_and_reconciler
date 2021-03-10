@@ -12,26 +12,41 @@ class BudgetCategoryRuleService(
         private val accountService: AccountService,
         private val budgetCategoryService: BudgetCategoryService) {
 
+    private var rules: List<BudgetCategoryRuleData> = emptyList()
+
     fun findMatchingRuleForAutoCategorization(mintTx: MintTransaction): BudgetCategoryRule? {
+        queryRulesIfNeeded()
         val rules = budgetCategoryRuleRepository
                 .readAll()
                 .filter { validateRuleOnlyRoutesOneAccount(it) }
-        val specificDescriptionRuleMatch =  rules.firstOrNull { rule ->
-            ruleDescriptionDoesMatchTransaction(rule, mintTx)
+        val ruleMatch =
+             rules.firstOrNull { rule -> ruleDescriptionDoesMatchTransaction(rule, mintTx) } ?:
+             rules.firstOrNull { rule -> ruleDescriptionUsesWildcardsAndDoesMatchTransaction(rule, mintTx) } ?:
+             rules.firstOrNull { rule -> ruleDescriptionIsAnythingAndDebitAccountMatches(rule, mintTx) } ?:
+             rules.firstOrNull { rule -> ruleDescriptionIsAnythingAndCreditAccountMatches(rule, mintTx) }
+        return validateRuleOrReturnNull(ruleMatch)
+    }
+
+    private fun queryRulesIfNeeded() {
+        if (rules.isEmpty()) {
+            rules = budgetCategoryRuleRepository
+                .readAll()
+                .filter { validateRuleOnlyRoutesOneAccount(it) }
         }
-        val anyDescriptionRuleMatch =
-            specificDescriptionRuleMatch ?:
-            rules.firstOrNull { rule ->
-                ruleDescriptionIsAnythingAndDebitAccountMatches(rule, mintTx)
-            } ?:
-            rules.firstOrNull { rule ->
-                ruleDescriptionIsAnythingAndCreditAccountMatches(rule, mintTx)
-            }
-        return validateRuleOrReturnNull(anyDescriptionRuleMatch)
     }
 
     private fun ruleDescriptionDoesMatchTransaction(rule: BudgetCategoryRuleData, mintTx: MintTransaction) =
             rule.descriptionToMatch == mintTx.description || rule.descriptionToMatch == mintTx.originalDescription
+
+    private fun ruleDescriptionUsesWildcardsAndDoesMatchTransaction(rule: BudgetCategoryRuleData,
+                                                                    mintTx: MintTransaction): Boolean {
+        return if (rule.descriptionToMatch.startsWith("*") && rule.descriptionToMatch.endsWith("*")) {
+            val description = rule.descriptionToMatch.removePrefix("*").removeSuffix("*")
+            mintTx.description.contains(description) || mintTx.originalDescription.contentEquals(description)
+        } else {
+            false
+        }
+    }
 
     private fun ruleDescriptionIsAnythingAndDebitAccountMatches(rule: BudgetCategoryRuleData, mintTx: MintTransaction)
     : Boolean {
