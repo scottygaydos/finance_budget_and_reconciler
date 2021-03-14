@@ -40,7 +40,7 @@ class BudgetCategoryRuleService(
 
     private fun ruleDescriptionUsesWildcardsAndDoesMatchTransaction(rule: BudgetCategoryRuleData,
                                                                     mintTx: MintTransaction): Boolean {
-        return if (rule.descriptionToMatch.startsWith("*") && rule.descriptionToMatch.endsWith("*")) {
+        return if (rule.descriptionToMatch.startsWith("*") && rule.descriptionToMatch.endsWith("*") && rule.descriptionToMatch.trim().length > 1) {
             val description = rule.descriptionToMatch.removePrefix("*").removeSuffix("*")
             mintTx.description.contains(description) || mintTx.originalDescription.contentEquals(description)
         } else {

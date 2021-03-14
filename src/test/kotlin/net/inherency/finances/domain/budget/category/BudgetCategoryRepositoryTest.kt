@@ -25,9 +25,9 @@ class BudgetCategoryRepositoryTest {
     @Test
     fun `Repository should successfully map rows, ignoring the first row because it is a header`() {
         val input = listOf(
-                listOf("Id", "Name", "Description"),
-                listOf("1", "Food", "Food Budget"),
-                listOf("16", "Non Budget", "A transaction that does not impact the budget")
+                listOf("Id", "Name", "Description", "Destination Id When Moving Budget Forward To Next Month"),
+                listOf("1", "Food", "Food Budget", "1"),
+                listOf("16", "Non Budget", "A transaction that does not impact the budget", "16")
         )
 
         whenever(googleSheetClient.listValuesInTab(TabName.BUDGET_CATEGORIES)).thenReturn(input)
@@ -35,8 +35,8 @@ class BudgetCategoryRepositoryTest {
         val result = budgetCategoryRepository.readAll()
 
         Assertions.assertEquals(2, result.size)
-        Assertions.assertEquals(BudgetCategoryData(1, "Food", "Food Budget"), result[0])
-        Assertions.assertEquals(BudgetCategoryData(16, "Non Budget", "A transaction that does not impact the budget"), result[1])
+        Assertions.assertEquals(BudgetCategoryData(1, "Food", "Food Budget", 1), result[0])
+        Assertions.assertEquals(BudgetCategoryData(16, "Non Budget", "A transaction that does not impact the budget", 1), result[1])
 
     }
 

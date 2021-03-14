@@ -33,10 +33,10 @@ class TransactionServiceTest {
             MintTransaction(LocalDate.of(2020, 1, 2), "first", "", 0, CreditOrDebit.DEBIT, "", ""),
             MintTransaction(LocalDate.of(2020, 1, 1), "second", "", 0, CreditOrDebit.DEBIT, "", "")
         )
-        whenever(mintClient.downloadAllTransactions()).thenReturn(updatedTransactions)
+        whenever(mintClient.downloadAllTransactions(true)).thenReturn(updatedTransactions)
 
         //WHEN
-        transactionService.updateMintTransactions()
+        transactionService.updateMintTransactions(true)
 
         //THEN
         verify(transactionRepository).clearAllExistingMintTransactions()
@@ -50,10 +50,10 @@ class TransactionServiceTest {
             MintTransaction(LocalDate.of(2020, 1, 1), "first", "", 0, CreditOrDebit.DEBIT, "", ""),
             MintTransaction(LocalDate.of(2020, 1, 2), "second", "", 0, CreditOrDebit.DEBIT, "", "")
         )
-        whenever(mintClient.downloadAllTransactions()).thenReturn(updatedTransactions)
+        whenever(mintClient.downloadAllTransactions(true)).thenReturn(updatedTransactions)
 
         //WHEN
-        transactionService.updateMintTransactions()
+        transactionService.updateMintTransactions(true)
 
         //THEN
         val sortedTransactions = listOf(
@@ -73,10 +73,10 @@ class TransactionServiceTest {
                 MintTransaction(LocalDate.of(2020, 1, 1), "first", "", 0, CreditOrDebit.DEBIT, "", ""),
                 MintTransaction(LocalDate.of(2020, 1, 2), "second", "", 0, CreditOrDebit.DEBIT, "", "")
         )
-        whenever(mintClient.downloadAllTransactions()).thenReturn(updatedTransactions)
+        whenever(mintClient.downloadAllTransactions(true)).thenReturn(updatedTransactions)
 
         //WHEN
-        val response = transactionService.updateMintTransactions()
+        val response = transactionService.updateMintTransactions(true)
 
         //THEN
         val sortedTransactions = listOf(
@@ -91,7 +91,7 @@ class TransactionServiceTest {
     fun `Create a transaction from DTO where all values are provided`() {
         //GIVEN
         val cmd = CreateTransactionCmd("2020-09-07", 1, "gas", 2, 3, "12.34", "12.35", true)
-        whenever(budgetCategoryService.readAll()).thenReturn(listOf(BudgetCategoryData(1, "gas", "gas")))
+        whenever(budgetCategoryService.readAll()).thenReturn(listOf(BudgetCategoryData(1, "gas", "gas", 1)))
 
         //WHEN
         transactionService.create(cmd)
@@ -115,7 +115,7 @@ class TransactionServiceTest {
     fun `Create a transaction from DTO where date not provided uses dateTimeService`() {
         //GIVEN
         val cmd = CreateTransactionCmd(null, 1, "gas", 2, 3, "12.34", "12.35", true)
-        whenever(budgetCategoryService.readAll()).thenReturn(listOf(BudgetCategoryData(1, "gas", "gas")))
+        whenever(budgetCategoryService.readAll()).thenReturn(listOf(BudgetCategoryData(1, "gas", "gas", 1)))
         val defaultTxDate = LocalDate.of(2019, 2, 3)
         whenever(dateTimeService.now()).thenReturn(defaultTxDate)
 
@@ -134,7 +134,7 @@ class TransactionServiceTest {
     fun `Create a transaction from DTO where settled amount not provided uses authorized amount as replacement`() {
         //GIVEN
         val cmd = CreateTransactionCmd("2020-09-07", 1, "gas", 2, 3, "12.34", null, true)
-        whenever(budgetCategoryService.readAll()).thenReturn(listOf(BudgetCategoryData(1, "gas", "gas")))
+        whenever(budgetCategoryService.readAll()).thenReturn(listOf(BudgetCategoryData(1, "gas", "gas", 1)))
 
         //WHEN
         transactionService.create(cmd)

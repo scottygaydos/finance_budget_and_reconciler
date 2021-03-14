@@ -15,7 +15,8 @@ class BudgetCategoryRepository(private val googleSheetClient: GoogleSheetClient)
             BudgetCategoryData(
                     row[0].toInt(),
                     row[1],
-                    row[2])
+                    row[2],
+                    row[3].toInt())
         }
     }
 }

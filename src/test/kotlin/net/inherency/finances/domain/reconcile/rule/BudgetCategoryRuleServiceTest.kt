@@ -42,7 +42,7 @@ class BudgetCategoryRuleServiceTest {
                 Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
-                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category")
+                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
         ))
 
         //WHEN
@@ -71,7 +71,7 @@ class BudgetCategoryRuleServiceTest {
             Account(ruleDebitAccountId, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
-            BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Transaction that does not affect a budget")
+            BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Transaction that does not affect a budget", ruleBudgetCategoryId)
         ))
 
         //WHEN
@@ -100,7 +100,7 @@ class BudgetCategoryRuleServiceTest {
             Account(ruleCreditAccountId, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
-            BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Transaction that does not affect a budget")
+            BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Transaction that does not affect a budget", ruleBudgetCategoryId)
         ))
 
         //WHEN
@@ -129,7 +129,7 @@ class BudgetCategoryRuleServiceTest {
                 Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
-                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category")
+                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
         ))
 
         //WHEN
@@ -158,7 +158,7 @@ class BudgetCategoryRuleServiceTest {
                 Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
-                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category")
+                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
         ))
 
         //WHEN
@@ -187,7 +187,7 @@ class BudgetCategoryRuleServiceTest {
                 Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
-                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category")
+                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
         ))
 
         //WHEN
@@ -217,7 +217,7 @@ class BudgetCategoryRuleServiceTest {
                 Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
-                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category")
+                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
         ))
 
         //WHEN
@@ -246,7 +246,7 @@ class BudgetCategoryRuleServiceTest {
                 Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
-                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category")
+                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
         ))
 
         //WHEN
@@ -275,7 +275,7 @@ class BudgetCategoryRuleServiceTest {
                 Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
-                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category")
+                BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
         ))
 
         //WHEN
@@ -304,7 +304,7 @@ class BudgetCategoryRuleServiceTest {
                 Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
-                BudgetCategoryData(8, categoryName, "Food Category")
+                BudgetCategoryData(8, categoryName, "Food Category", ruleBudgetCategoryId)
         ))
 
         //WHEN

@@ -55,7 +55,7 @@ class RemainingMintTransactionsServiceTest {
         doReturn("y", "s").whenever(commandLineService).readFromCommandLine()
 
         //The "Spending" budget category can be found
-        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category")
+        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category", 1)
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(spendingCategory))
 
         //One remaining mint transaction
@@ -87,7 +87,7 @@ class RemainingMintTransactionsServiceTest {
         doReturn(AFFIRMATIVE_ANSWERS[0], "x", "2145254324", "s").whenever(commandLineService).readFromCommandLine()
 
         //The "Spending" budget category can be found
-        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category")
+        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category", 1)
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(spendingCategory))
 
         //One remaining mint transaction
@@ -118,7 +118,7 @@ class RemainingMintTransactionsServiceTest {
         doReturn("n").whenever(commandLineService).readFromCommandLine()
 
         //The "Spending" budget category can be found
-        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category")
+        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category", 1)
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(spendingCategory))
 
         //One remaining mint transaction
@@ -149,7 +149,7 @@ class RemainingMintTransactionsServiceTest {
         doReturn("n", AFFIRMATIVE_ANSWERS[1], "s").whenever(commandLineService).readFromCommandLine()
 
         //The "Spending" budget category can be found
-        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category")
+        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category", 1)
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(spendingCategory))
 
         //Two remaining mint transactions
@@ -181,7 +181,7 @@ class RemainingMintTransactionsServiceTest {
         whenever(accountService.readAll()).thenReturn(listOf(checkingAccount, globalExternalAccount))
 
         //The system finds a matching rule for the transaction and category
-        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category")
+        val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category", 1)
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(spendingCategory))
         whenever(budgetCategoryRuleService.findMatchingRuleForAutoCategorization(any())).thenReturn(BudgetCategoryRule(
                 spendingCategory, checkingAccount, globalExternalAccount))

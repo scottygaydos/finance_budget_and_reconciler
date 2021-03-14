@@ -31,18 +31,22 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     private val log = LoggerFactory.getLogger(MintClient::class.java)
     private val chromeDriverSystemPropertyKey = "webdriver.chrome.driver"
 
-    fun downloadAllTransactions(): List<MintTransaction> {
-        log.info("Config to wait for {} seconds.", configs.getString(ConfigKey.CHROME_WAIT_FOR_UPDATE_SECONDS))
-        setChromeDriverLocation()
-        val driver = createMintDriverInstance()
-        try {
-            navigateToMintPage(driver)
-            completeSignInForm(driver)
-            waitForTransactionRefreshToComplete(driver)
-            downloadTransactionFile(driver)
-            waitForDownloadCompletion()
-        } finally {
-            closeChrome(driver)
+    fun downloadAllTransactions(doDownloadFile: Boolean): List<MintTransaction> {
+        if (doDownloadFile) {
+            log.info("Config to wait for {} seconds.", configs.getString(ConfigKey.CHROME_WAIT_FOR_UPDATE_SECONDS))
+            setChromeDriverLocation()
+            val driver = createMintDriverInstance()
+            try {
+                navigateToMintPage(driver)
+                completeSignInForm(driver)
+                waitForTransactionRefreshToComplete(driver)
+                downloadTransactionFile(driver)
+                waitForDownloadCompletion()
+            } finally {
+                closeChrome(driver)
+            }
+        } else {
+            log.info("Not downloading file... assuming file is already placed in download folder!")
         }
 
         val downloadFilePath = getDownloadFilePath()

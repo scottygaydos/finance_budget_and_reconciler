@@ -23,8 +23,8 @@ class TransactionService(
         private val budgetCategoryService: BudgetCategoryService,
         private val accountService: AccountService) {
 
-    fun updateMintTransactions(): List<MintTransaction> {
-        val sortedMintTransactions = mintClient.downloadAllTransactions()
+    fun updateMintTransactions(doDownloadFile: Boolean): List<MintTransaction> {
+        val sortedMintTransactions = mintClient.downloadAllTransactions(doDownloadFile)
             .filterNot { it.accountName == "INDIVIDUAL - TOD" } //TODO: Handle this with configuration somehow
             .filterNot { it.accountName == "ONPREM 401k" } //TODO: Handle this with configuration somehow
             .filterNot { it.accountName == "CHASE AUTO ACCOUNT" } //TODO: Handle this with configuration somehow
