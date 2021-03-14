@@ -25,12 +25,12 @@ class ReconcileService(
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    fun reconcile(): ReconcileResult {
+    fun reconcile(doDownloadFile: Boolean): ReconcileResult {
         log.info("Reading all reconciled transactions...")
         val reconciledTransactions = transactionService.listAllReconciledTransactions()
 
         log.info("Updating google sheet with mint transactions...")
-        val allMintTransactions = transactionService.updateMintTransactions()
+        val allMintTransactions = transactionService.updateMintTransactions(doDownloadFile)
         val mintTxsToReconcile = allMintTransactions
                 .filterNot { mintTx -> reconciledTransactions.map { it.mintId }.contains(mintTx.getIdAsString()) }
 

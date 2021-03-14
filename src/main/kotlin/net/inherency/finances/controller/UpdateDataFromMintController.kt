@@ -12,7 +12,7 @@ class UpdateDataFromMintController(private val transactionService: TransactionSe
 
     @PostMapping(value = ["update"])
     fun update(): List<MintTransaction> {
-        return transactionService.updateMintTransactions()
+        return transactionService.updateMintTransactions(true)
     }
 
 }

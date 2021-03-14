@@ -13,6 +13,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.*
+import kotlin.math.min
 
 @Service
 class BudgetService(
@@ -46,38 +47,46 @@ class BudgetService(
     fun moveRemainderToNextMonth(cmd: MoveRemainderToNextMonthCmd) {
         validateYearAndMonthParameters(cmd.budgetYear, cmd.budgetMonth)
         val budgetReportDTO = generateMonthlyBudgetReport(cmd.budgetMonth, cmd.budgetYear)
-        check(budgetReportDTO.totalRemainingBudget <= 0)
+        check(budgetReportDTO.totalRemainingBudget > 0)
             {"Cannot move negative or zero budget amount forward"}
 
-        val amountToMove: Int = budgetReportDTO.totalRemainingBudget
-        val existingYearMonth: LocalDate = dateTimeService.fromYearAndMonth(cmd.budgetYear, cmd.budgetMonth)
-        val nextYearMonth = existingYearMonth.plusMonths(1)
-        val debitCheckingForOldMonthCmd = CategorizedTransaction(
-                UUID.randomUUID(),
-                existingYearMonth,
-                5, //TODO: Make this look up by name.  TODO even more: Allow UI to choose destination.
-                "Move Budget To Next Month",
-                "Move Budget To Next Month",
-                2, //ToDo: Add feature to look this up; this is 'global external debit account'
-                1, //ToDo: Use ^ feature; this is 'scotty checking'
-                amountToMove,
-                amountToMove,
-                false
-        )
-        val creditCheckingForNextMonthCmd = CategorizedTransaction(
-                UUID.randomUUID(),
-                nextYearMonth,
-                5, //TODO: Make this look up by name.  TODO even more: Allow UI to choose destination.
-                "Move Budget From Previous Month",
-                "Move Budget From Previous Month",
-                1, //ToDo: Use v feature; this is 'scotty checking'
-                2, //ToDo: Add feature to look this up; this is 'global external debit account'
-                amountToMove,
-                amountToMove,
-                false
-        )
-        transactionService.create(debitCheckingForOldMonthCmd)
-        transactionService.create(creditCheckingForNextMonthCmd)
+        var remainingBudget = budgetReportDTO.totalRemainingBudget
+        budgetCategoryService.readAll().sortedByDescending { it.moveBudgetForwardDestinationCategoryId }.forEach { budgetCategory ->
+            val amountToMove: Int = min(
+                budgetReportDTO.transactionTypeReports[budgetCategory.id]?.remainingAmount ?: 0,
+                remainingBudget)
+            if (amountToMove > 0 && remainingBudget > 0) {
+                val existingYearMonth: LocalDate = dateTimeService.fromYearAndMonth(cmd.budgetYear, cmd.budgetMonth)
+                val nextYearMonth = existingYearMonth.plusMonths(1)
+                val debitCheckingForOldMonthCmd = CategorizedTransaction(
+                    UUID.randomUUID(),
+                    existingYearMonth,
+                    budgetCategory.id,
+                    "Move Budget To Next Month",
+                    "Move Budget To Next Month",
+                    2, //ToDo: Add feature to look this up; this is 'global external debit account'
+                    1, //ToDo: Use ^ feature; this is 'scotty checking'
+                    amountToMove,
+                    amountToMove,
+                    false
+                )
+                val creditCheckingForNextMonthCmd = CategorizedTransaction(
+                    UUID.randomUUID(),
+                    nextYearMonth,
+                    budgetCategory.moveBudgetForwardDestinationCategoryId,
+                    "Move Budget From Previous Month",
+                    "Move Budget From Previous Month",
+                    1, //ToDo: Use v feature; this is 'scotty checking'
+                    2, //ToDo: Add feature to look this up; this is 'global external debit account'
+                    amountToMove,
+                    amountToMove,
+                    false
+                )
+                transactionService.create(debitCheckingForOldMonthCmd)
+                transactionService.create(creditCheckingForNextMonthCmd)
+                remainingBudget -= amountToMove
+            }
+        }
     }
 
     private fun generateNewBudgetRecords(allBudgetTemplateValues: List<BudgetTemplateData>, month: Month, year: Int)

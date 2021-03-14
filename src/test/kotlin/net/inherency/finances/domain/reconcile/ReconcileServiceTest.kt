@@ -28,7 +28,7 @@ class ReconcileServiceTest {
         val category = "Income"
         val accountName = "Checking Account"
         val mintTx = MintTransaction(txDate, description, originalDescription, amount, credit, category, accountName)
-        whenever(transactionService.updateMintTransactions()).thenReturn(listOf(mintTx))
+        whenever(transactionService.updateMintTransactions(true)).thenReturn(listOf(mintTx))
 
         //AND: A categorized transaction
         val categorizedTx = CategorizedTransaction(
@@ -40,7 +40,7 @@ class ReconcileServiceTest {
         whenever(transactionService.listAllReconciledTransactions()).thenReturn(listOf(reconciledTransaction))
 
         //WHEN: We reconcile the transactions
-        val result = reconcileService.reconcile()
+        val result = reconcileService.reconcile(true)
 
         //THEN: The transactions are already categorized
         Assertions.assertEquals(1, result.reconciledTransactions.size)
@@ -59,7 +59,7 @@ class ReconcileServiceTest {
         val category = "Income"
         val accountName = "Checking Account"
         val mintTx = MintTransaction(txDate, description, originalDescription, 111, credit, category, accountName)
-        whenever(transactionService.updateMintTransactions()).thenReturn(listOf(mintTx))
+        whenever(transactionService.updateMintTransactions(true)).thenReturn(listOf(mintTx))
         //AND: Both the mint transaction has an identifiable account
         val accountId = 1
         whenever(accountService.readAll()).thenReturn(
@@ -76,7 +76,7 @@ class ReconcileServiceTest {
 
         //WHEN: We reconcile the transactions
         //AND: We do not reconcile these transactions to match anything
-        val result = reconcileService.reconcile()
+        val result = reconcileService.reconcile(true)
 
         //THEN: Both transactions are reported as unreconciled
         Assertions.assertEquals(0, result.reconciledTransactions.size)

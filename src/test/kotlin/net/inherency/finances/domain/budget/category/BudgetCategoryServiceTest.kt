@@ -22,8 +22,8 @@ class BudgetCategoryServiceTest {
 
     @Test
     fun `A good set of category data reports successfully`() {
-        val foodCategory = BudgetCategoryData(1, "Food", "Food Budget")
-        val gasCategory = BudgetCategoryData(2, "Gas", "Gas Budget")
+        val foodCategory = BudgetCategoryData(1, "Food", "Food Budget", 1)
+        val gasCategory = BudgetCategoryData(2, "Gas", "Gas Budget", 2)
         val input = listOf(foodCategory, gasCategory)
 
         whenever(budgetCategoryRepository.readAll()).thenReturn(input)
@@ -48,8 +48,8 @@ class BudgetCategoryServiceTest {
 
     @Test
     fun `The application throws an exception if the data has more than one entry with the same id`() {
-        val foodCategory = BudgetCategoryData(1, "Food", "Food Budget")
-        val gasCategory = BudgetCategoryData(1, "Gas", "Gas Budget")
+        val foodCategory = BudgetCategoryData(1, "Food", "Food Budget", 1)
+        val gasCategory = BudgetCategoryData(1, "Gas", "Gas Budget", 2 )
         val input = listOf(foodCategory, gasCategory)
 
         whenever(budgetCategoryRepository.readAll()).thenReturn(input)
@@ -61,8 +61,8 @@ class BudgetCategoryServiceTest {
 
     @Test
     fun `The application throws an exception if the data has more than one entry with the same name`() {
-        val foodCategory = BudgetCategoryData(1, "Food", "Food Budget")
-        val gasCategory = BudgetCategoryData(2, "Food", "Gas Budget")
+        val foodCategory = BudgetCategoryData(1, "Food", "Food Budget", 1)
+        val gasCategory = BudgetCategoryData(2, "Food", "Gas Budget", 2)
         val input = listOf(foodCategory, gasCategory)
 
         whenever(budgetCategoryRepository.readAll()).thenReturn(input)

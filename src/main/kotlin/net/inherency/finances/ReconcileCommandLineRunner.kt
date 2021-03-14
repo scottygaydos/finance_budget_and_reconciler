@@ -20,7 +20,8 @@ class ReconcileCommandLineRunner(
             return
         }
         try {
-            val result = reconcileService.reconcile()
+            val doDownloadFile = args.map { it?.toLowerCase()?.trim() }.contains("download")
+            val result = reconcileService.reconcile(doDownloadFile)
             log.info("There are ${result.unreconciledMintTransactions.size} unreconciled mint transactions remaining.")
             log.info("There are ${result.unreconciledCategorizedTransactions.size} " +
                     "unreconciled categorized transactions remaining.")
