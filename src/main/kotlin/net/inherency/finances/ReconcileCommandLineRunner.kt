@@ -5,6 +5,7 @@ import net.inherency.finances.domain.reconcile.RemainingMintTransactionsService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Service
+import java.io.FileNotFoundException
 import java.lang.Exception
 
 @Service
@@ -29,6 +30,8 @@ class ReconcileCommandLineRunner(
             remainingMintTransactionsService
                     .promptAndHandleRemainingMintTransactions(result.unreconciledMintTransactions)
 
+        } catch (ex: FileNotFoundException) {
+            log.info("Will not reconcile in command line because there is no transactions.csv file downloaded.")
         } catch (e: Exception) {
             log.error("Could not reconcile in command line", e)
         }
