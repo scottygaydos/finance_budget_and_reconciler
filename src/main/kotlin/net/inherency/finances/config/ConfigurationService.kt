@@ -3,7 +3,9 @@ package net.inherency.finances.config
 import net.inherency.finances.EnvVars
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
+import java.io.File
 import java.lang.IllegalStateException
+import java.util.*
 
 @Configuration
 @EnableConfigurationProperties(AppConfig::class)
@@ -20,12 +22,22 @@ open class ConfigurationService(
     }
 
     fun getString(configKey: ConfigKey): String {
-        val valueFromEnv = readFromEnv(configKey)
-        return if (valueFromEnv.isNullOrBlank()) {
-            readFromYml(configKey)
+        return if (configKey == ConfigKey.GOOGLE_AUTH_JSON) {
+            try {
+                File("google.json").bufferedReader().readText()
+            } catch (e: Exception) {
+                File("src/main/resources/google.json").bufferedReader().readText()
+            }
+
         } else {
-            valueFromEnv
+            val valueFromEnv = readFromEnv(configKey)
+            return if (valueFromEnv.isNullOrBlank()) {
+                readFromYml(configKey)
+            } else {
+                valueFromEnv
+            }
         }
+
     }
 
     private fun readFromYml(configKeyKey: ConfigKey): String {
@@ -45,6 +57,12 @@ open class ConfigurationService(
     }
 
     private fun readFromEnv(configKeyKey: ConfigKey): String? {
-        return envVars[configKeyKey.name.toLowerCase()] as String?
+        val value = envVars[configKeyKey.name.toLowerCase()] as String?
+        return if (configKeyKey == ConfigKey.GOOGLE_AUTH_JSON) {
+            String(Base64.getDecoder().decode(value))
+        } else {
+            value
+        }
+
     }
 }

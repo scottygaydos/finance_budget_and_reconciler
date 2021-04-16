@@ -51,9 +51,15 @@ data class MintTransaction (
     }
 
     override fun toString(): String {
-        return "MintTransaction(date=$date, description='$description', originalDescription='$originalDescription', " +
-            System.lineSeparator() +
-                "amount=$amount, category='$category', accountName='$accountName, creditOrDebit=$creditOrDebit')"
+        val newLine = System.lineSeparator()
+        return "MintTransaction " + newLine +
+                "   date=" + date + newLine +
+                "   description=" + description + newLine +
+                "   originalDescription=" + originalDescription + newLine +
+                "   amount=" + amount + newLine +
+                "   creditOrDebit=" + creditOrDebit + newLine +
+                "   category=" + category + newLine +
+                "   account=" + accountName
     }
 
 
