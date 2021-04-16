@@ -1,6 +1,7 @@
 package net.inherency.finances.domain.reconcile
 
 import net.inherency.finances.CommandLineService
+import net.inherency.finances.CommandLineService.Companion.AFFIRMATIVE_ANSWERS
 import net.inherency.finances.domain.account.Account
 import net.inherency.finances.domain.account.AccountService
 import net.inherency.finances.domain.account.AccountService.Companion.GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME
@@ -22,10 +23,6 @@ class RemainingMintTransactionsService(
         private val budgetCategoryService: BudgetCategoryService,
         private val budgetCategoryRuleService: BudgetCategoryRuleService,
         private val debitAndCreditAccountFactory: DebitAndCreditAccountFactory) {
-
-    companion object {
-        val AFFIRMATIVE_ANSWERS = listOf("y", "yes", "true")
-    }
 
     private val log = LoggerFactory.getLogger(RemainingMintTransactionsService::class.java)
 
@@ -49,8 +46,8 @@ class RemainingMintTransactionsService(
             if (matchingRule != null) {
                 createTransactionFromRule(matchingRule, creditAccount, debitAccount, mintTx)
             } else {
-                val response = askToCategorizeTransaction(mintTx)
-                if (AFFIRMATIVE_ANSWERS.map { it.toLowerCase() }.contains(response.toLowerCase())) {
+                val doCategorize = askToCategorizeTransaction(mintTx)
+                if (doCategorize) {
                     val inputOption = selectInputOption(budgetCategories)
                     createCategorizedTransaction(creditAccount, debitAccount, mintTx, inputOption)
                 }
@@ -60,10 +57,10 @@ class RemainingMintTransactionsService(
         log.info("*** Reconciliation complete ***")
     }
 
-    private fun askToCategorizeTransaction(mintTx: MintTransaction): String {
+    private fun askToCategorizeTransaction(mintTx: MintTransaction): Boolean {
         log.info(mintTx.toString())
-        log.info("Do you want to add this transaction?  To confirm enter one of the following: $AFFIRMATIVE_ANSWERS")
-        return commandLineService.readFromCommandLine()
+        log.info("Do you want to add this transaction?")
+        return commandLineService.readConfirmation()
     }
 
     private fun createTransactionFromRule(matchingRule: BudgetCategoryRule, creditAccount: Account, debitAccount: Account, mintTx: MintTransaction) {

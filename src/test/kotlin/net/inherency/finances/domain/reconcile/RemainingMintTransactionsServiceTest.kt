@@ -2,12 +2,12 @@ package net.inherency.finances.domain.reconcile
 
 import com.nhaarman.mockitokotlin2.*
 import net.inherency.finances.CommandLineService
+import net.inherency.finances.CommandLineService.Companion.AFFIRMATIVE_ANSWERS
 import net.inherency.finances.domain.account.Account
 import net.inherency.finances.domain.account.AccountService
 import net.inherency.finances.domain.account.AccountService.Companion.GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME
 import net.inherency.finances.domain.budget.category.BudgetCategoryData
 import net.inherency.finances.domain.budget.category.BudgetCategoryService
-import net.inherency.finances.domain.reconcile.RemainingMintTransactionsService.Companion.AFFIRMATIVE_ANSWERS
 import net.inherency.finances.domain.reconcile.rule.BudgetCategoryRule
 import net.inherency.finances.domain.reconcile.rule.BudgetCategoryRuleService
 import net.inherency.finances.domain.transaction.CreditOrDebit

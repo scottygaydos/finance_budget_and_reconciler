@@ -11,9 +11,9 @@ import java.util.*
 
 @Repository
 class TransactionRepositoryGoogleSheetImpl(
-        private val googleSheetClient: GoogleSheetClient,
-        private val mintTransactionFactory: MintTransactionFactory,
-        private val categorizedTransactionFactory: CategorizedTransactionFactory): TransactionRepository {
+    private val googleSheetClient: GoogleSheetClient,
+    private val mintTransactionFactory: MintTransactionFactory,
+    private val categorizedTransactionFactory: CategorizedTransactionFactory): TransactionRepository {
 
     override fun addCategorizedTransactionRow(categorizedTransaction: CategorizedTransaction) {
         val singleRowList = listOf(categorizedTransaction.toGoogleSheetRowList())
@@ -55,7 +55,7 @@ class TransactionRepositoryGoogleSheetImpl(
     override fun writeHeaderAndAllTransactions(
             tabName: TabName, headerRow: MutableList<String>, sortedItems: List<Transaction>) {
         val allRows = sortedItems
-                .map { it.toGoogleSheetRowList().toMutableList() }.toMutableList()
+                .map { it.toGoogleSheetRowList() }.toMutableList()
         allRows.add(0, headerRow)
         googleSheetClient.writeAllValuesToTab(tabName, allRows)
     }

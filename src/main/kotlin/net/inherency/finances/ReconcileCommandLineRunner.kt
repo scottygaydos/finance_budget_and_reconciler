@@ -11,7 +11,8 @@ import java.lang.Exception
 @Service
 class ReconcileCommandLineRunner(
         private val reconcileService: ReconcileService,
-        private val remainingMintTransactionsService: RemainingMintTransactionsService): CommandLineRunner {
+        private val remainingMintTransactionsService: RemainingMintTransactionsService,
+        private val commandLineService: CommandLineService): CommandLineRunner {
 
     private val log = LoggerFactory.getLogger(ReconcileCommandLineRunner::class.java)
 
@@ -21,7 +22,8 @@ class ReconcileCommandLineRunner(
             return
         }
         try {
-            val doDownloadFile = args.map { it?.toLowerCase()?.trim() }.contains("download")
+            log.info("Do you want to download a new mint file?")
+            val doDownloadFile = commandLineService.readConfirmation()
             val result = reconcileService.reconcile(doDownloadFile)
             log.info("There are ${result.unreconciledMintTransactions.size} unreconciled mint transactions remaining.")
             log.info("There are ${result.unreconciledCategorizedTransactions.size} " +

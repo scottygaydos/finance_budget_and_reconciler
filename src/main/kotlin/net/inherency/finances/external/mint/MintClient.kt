@@ -3,6 +3,7 @@ package net.inherency.finances.external.mint
 import net.inherency.finances.config.ConfigurationService
 import net.inherency.finances.config.ConfigKey
 import net.inherency.finances.domain.transaction.MintTransaction
+import net.inherency.finances.domain.transaction.TransactionRepository
 import net.inherency.finances.external.parseMintFileAmount
 import net.inherency.finances.external.parseMintFileLocalDate
 import org.openqa.selenium.By
@@ -16,9 +17,12 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @Service
-class MintClient(private val configs: ConfigurationService, private val mintFileParser: MintFileParser) {
+class MintClient(private val configs: ConfigurationService,
+                 private val mintFileParser: MintFileParser,
+                 private val transactionRepository: TransactionRepository) {
 
     companion object {
+        const val MINT_START_LOGIN_BUTTON = "/html/body/div[1]/div/header/div/div[1]/div/div[3]/a"
         const val FORM_EMAIL_INPUT = "Email"
         const val FORM_PASSWORD_INPUT = "Password"
         const val FORM_SIGN_IN_BUTTON = "SignIn"
@@ -42,17 +46,17 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
                 waitForTransactionRefreshToComplete(driver)
                 downloadTransactionFile(driver)
                 waitForDownloadCompletion()
+                val downloadFilePath = getDownloadFilePath()
+                val transactions = transformFileToMintTransactions(downloadFilePath)
+                deleteDownloadFile(downloadFilePath)
+                return transactions
             } finally {
                 closeChrome(driver)
             }
         } else {
-            log.info("Not downloading file... assuming file is already placed in download folder!")
+            log.info("Not downloading file... Reading MINT_TRANSACTIONS from our storage instead.")
+            return transactionRepository.listAllMintTransactions()
         }
-
-        val downloadFilePath = getDownloadFilePath()
-        val transactions = transformFileToMintTransactions(downloadFilePath)
-        deleteDownloadFile(downloadFilePath)
-        return transactions
     }
 
     private fun closeChrome(driver: ChromeDriver) {
@@ -117,6 +121,7 @@ class MintClient(private val configs: ConfigurationService, private val mintFile
     }
 
     private fun completeSignInForm(driver: ChromeDriver) {
+        driver.findElementByXPath(MINT_START_LOGIN_BUTTON).click()
         val email = configs.getString(ConfigKey.MINT_LOGIN_EMAIL)
         val password = configs.getString(ConfigKey.MINT_LOGIN_PASSWORD)
         try {
