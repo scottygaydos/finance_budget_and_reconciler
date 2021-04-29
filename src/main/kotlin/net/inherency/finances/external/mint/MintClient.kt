@@ -46,17 +46,26 @@ class MintClient(private val configs: ConfigurationService,
                 waitForTransactionRefreshToComplete(driver)
                 downloadTransactionFile(driver)
                 waitForDownloadCompletion()
-                val downloadFilePath = getDownloadFilePath()
-                val transactions = transformFileToMintTransactions(downloadFilePath)
-                deleteDownloadFile(downloadFilePath)
-                return transactions
+                return reportDownloadedTransactionFile()
             } finally {
                 closeChrome(driver)
             }
         } else {
-            log.info("Not downloading file... Reading MINT_TRANSACTIONS from our storage instead.")
-            return transactionRepository.listAllMintTransactions()
+            log.info("Not downloading file... Checking to see if there is already a downloaded file.")
+            return try {
+                reportDownloadedTransactionFile()
+            } catch (e: Exception) {
+                log.info("Could not use download file.  Using existing transactions in spreadsheet...")
+                transactionRepository.listAllMintTransactions()
+            }
         }
+    }
+
+    private fun reportDownloadedTransactionFile(): List<MintTransaction> {
+        val downloadFilePath = getDownloadFilePath()
+        val transactions = transformFileToMintTransactions(downloadFilePath)
+        deleteDownloadFile(downloadFilePath)
+        return transactions
     }
 
     private fun closeChrome(driver: ChromeDriver) {
@@ -139,10 +148,16 @@ class MintClient(private val configs: ConfigurationService,
                     .sendKeys(password)
                 driver.findElementByCssSelector(CONTINUE_AFTER_PASSWORD_CSS_SELECTOR).click()
             } catch (e2: Exception) {
+                log.info("Exception trying second method... trying third")
+                driver.get("https://accounts.intuit.com/index.html?offering_id=Intuit.ifs.mint&namespace_id=50000026&redirect_url=https%3A%2F%2Fmint.intuit.com%2Foverview.event%3Futm_medium%3Ddirect%26cta%3Dnav_login_dropdown%26ivid%3D241355d6-f922-46da-bac3-17a6dbbe7fad")
+                driver.findElement(By.name(FORM_EMAIL_INPUT)).sendKeys(email)
+                driver.findElement(By.name(FORM_PASSWORD_INPUT)).sendKeys(password)
+                driver.findElement(By.name(FORM_SIGN_IN_BUTTON)).click()
+            } catch (noMore: Exception) {
                 log.error("Could not complete sign in for file download", e)
                 log.info("Please press Enter to continue...")
                 readLine()
-                throw e2
+                throw noMore
             }
         }
         log.info("Completed sign in with email = {} and password <...>", email)
