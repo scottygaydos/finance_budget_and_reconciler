@@ -6,5 +6,6 @@ data class BillData (
         val description: String,
         val dueDayOfMonth: Int,
         val autoPayEnabled: Boolean,
-        val showInUIReports: Boolean
+        val showInUIReports: Boolean,
+        val budgetCategoryId: Int
 )

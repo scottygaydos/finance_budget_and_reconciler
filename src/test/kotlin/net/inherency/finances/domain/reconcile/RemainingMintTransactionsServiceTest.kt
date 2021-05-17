@@ -6,6 +6,7 @@ import net.inherency.finances.CommandLineService.Companion.AFFIRMATIVE_ANSWERS
 import net.inherency.finances.domain.account.Account
 import net.inherency.finances.domain.account.AccountService
 import net.inherency.finances.domain.account.AccountService.Companion.GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME
+import net.inherency.finances.domain.bill.BillService
 import net.inherency.finances.domain.budget.category.BudgetCategoryData
 import net.inherency.finances.domain.budget.category.BudgetCategoryService
 import net.inherency.finances.domain.reconcile.rule.BudgetCategoryRule
@@ -23,11 +24,12 @@ class RemainingMintTransactionsServiceTest {
     private val transactionService: TransactionService = mock()
     private val budgetCategoryService: BudgetCategoryService = mock()
     private val budgetCategoryRuleService: BudgetCategoryRuleService = mock()
+    private val billService: BillService = mock()
     private val debitAndCreditAccountFactory: DebitAndCreditAccountFactory = DebitAndCreditAccountFactory()
 
     private val remainingMintTransactionsService = RemainingMintTransactionsService(
             accountService, commandLineService, transactionService, budgetCategoryService, budgetCategoryRuleService,
-            debitAndCreditAccountFactory
+            debitAndCreditAccountFactory, billService
     )
 
     @Test

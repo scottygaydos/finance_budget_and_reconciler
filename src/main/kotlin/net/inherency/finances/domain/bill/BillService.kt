@@ -10,6 +10,10 @@ import java.time.LocalDate
 @Service
 class BillService(private val billRepository: BillRepository, private val transactionService: TransactionService) {
 
+    fun findAllBills(): List<BillData> {
+        return billRepository.readAll()
+    }
+
     fun findAllBillsReportableViaUI(): BillReportDTO {
         val bills = billRepository
                 .readAll()

@@ -18,7 +18,8 @@ class BillRepositoryGoogleSheetImpl(private val googleSheetClient: GoogleSheetCl
                             row[2],
                             row[3].toInt(),
                             row[4].toBoolean(),
-                            row[5].toBoolean()
+                            row[5].toBoolean(),
+                            row[6].toInt()
                     )
                 }
     }

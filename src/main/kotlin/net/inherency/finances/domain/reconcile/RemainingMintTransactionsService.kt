@@ -1,10 +1,10 @@
 package net.inherency.finances.domain.reconcile
 
 import net.inherency.finances.CommandLineService
-import net.inherency.finances.CommandLineService.Companion.AFFIRMATIVE_ANSWERS
 import net.inherency.finances.domain.account.Account
 import net.inherency.finances.domain.account.AccountService
 import net.inherency.finances.domain.account.AccountService.Companion.GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME
+import net.inherency.finances.domain.bill.BillService
 import net.inherency.finances.domain.budget.category.BudgetCategoryData
 import net.inherency.finances.domain.budget.category.BudgetCategoryService
 import net.inherency.finances.domain.reconcile.rule.BudgetCategoryRule
@@ -22,7 +22,8 @@ class RemainingMintTransactionsService(
         private val transactionService: TransactionService,
         private val budgetCategoryService: BudgetCategoryService,
         private val budgetCategoryRuleService: BudgetCategoryRuleService,
-        private val debitAndCreditAccountFactory: DebitAndCreditAccountFactory) {
+        private val debitAndCreditAccountFactory: DebitAndCreditAccountFactory,
+        private val billService: BillService) {
 
     private val log = LoggerFactory.getLogger(RemainingMintTransactionsService::class.java)
 
@@ -75,8 +76,39 @@ class RemainingMintTransactionsService(
     private fun createCategorizedTransaction(
             creditAccount: Account, debitAccount: Account, mintTransaction: MintTransaction,
             category: BudgetCategoryData) {
+
+        val creditAccountToUse = if (isBill(category)) {
+            val billOptions = billService.findAllBills()
+                .filter { it.budgetCategoryId == category.id }
+            val billData = if (billOptions.size == 1) {
+                billOptions.first()
+            } else {
+                log.info("This is a bill. Please type the account id number to use:")
+                billOptions.forEach {
+                    log.info(it.toString())
+                }
+                val billAccountSelection = commandLineService.readFromCommandLine()
+                billOptions.first { it.accountId == billAccountSelection.toInt() }
+
+            }
+            accountService.readAll().first { it.id == billData.accountId }
+        } else {
+            creditAccount
+        }
         transactionService.createCategorizedTransactionFromMintTransaction(
-                creditAccount, debitAccount, mintTransaction, category)
+                creditAccountToUse, debitAccount, mintTransaction, category)
+
+    }
+
+    private fun isBill(category: BudgetCategoryData): Boolean {
+        return when(category.name) {
+            "Utilities" -> true
+            "Mortgage" -> true
+            "Car" -> true
+            "Car Insurance" -> true
+            "Credit Card Payment" -> true
+            else -> false
+        }
     }
 
     private fun selectInputOption(budgetCategories: List<BudgetCategoryData>): BudgetCategoryData {
