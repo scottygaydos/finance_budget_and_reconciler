@@ -33,9 +33,9 @@ class BillServiceTest {
 
     private fun generateBillToPaymentDate(billArgs: BillArgs = BillArgs()): Map<BillData, LocalDate> {
         val waterBill = BillData(billArgs.waterAccountId, "Water", "Water Bill", billArgs.waterDueDayOfMonth,
-                autoPayEnabled = true, showInUIReports = true)
+                autoPayEnabled = true, showInUIReports = true, budgetCategoryId = 4)
         val rentBill = BillData(billArgs.rentAccountId, "Rent", "Rent Bill", billArgs.rentDueDayOfMonth,
-                autoPayEnabled = false, showInUIReports = true)
+                autoPayEnabled = false, showInUIReports = true, budgetCategoryId = 7)
         return mapOf(
                 waterBill to billArgs.waterBillPayDate,
                 rentBill to billArgs.rentBillPayDate
@@ -103,7 +103,9 @@ class BillServiceTest {
     @Test
     fun `findAllBillsReportableViaUI filters out bills that are not supposed to show in UI reports`() {
         val billPaymentInfo = generateBillToPaymentDate()
-        val hiddenOldCreditCardBill = BillData(3, "Old CC", "Old Card", 10, autoPayEnabled = false, showInUIReports = false)
+        val hiddenOldCreditCardBill = BillData(3, "Old CC", "Old Card", 10, autoPayEnabled = false, showInUIReports = false,
+            budgetCategoryId = 12
+        )
         val bills = listOf(billPaymentInfo.entries.toList()[0].key, billPaymentInfo.entries.toList()[1].key, hiddenOldCreditCardBill)
         whenever(billRepository.readAll()).thenReturn(bills)
         whenever(transactionService.listAllCategorizedTransactions()).thenReturn(
@@ -131,7 +133,8 @@ class BillServiceTest {
     @Test
     fun `findAllBillsReportableViaUI does not fail when a bill has bad dueDayOfMonth data if it is hidden from reports`() {
         val billPaymentInfo = generateBillToPaymentDate()
-        val hiddenOldCreditCardBill = BillData(3, "Old CC", "Old Card", 32, autoPayEnabled = false, showInUIReports = false)
+        val hiddenOldCreditCardBill = BillData(3, "Old CC", "Old Card", 32, autoPayEnabled = false, showInUIReports = false,
+            budgetCategoryId = 12 )
         val bills = listOf(billPaymentInfo.entries.toList()[0].key, billPaymentInfo.entries.toList()[1].key, hiddenOldCreditCardBill)
         whenever(billRepository.readAll()).thenReturn(bills)
 
