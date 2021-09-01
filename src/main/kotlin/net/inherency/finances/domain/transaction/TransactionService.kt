@@ -25,10 +25,13 @@ class TransactionService(
 
     fun updateMintTransactions(doDownloadFile: Boolean): List<MintTransaction> {
         val sortedMintTransactions = mintClient.downloadAllTransactions(doDownloadFile)
+            .asSequence()
             .filterNot { it.accountName == "INDIVIDUAL - TOD" } //TODO: Handle this with configuration somehow
             .filterNot { it.accountName == "ONPREM 401k" } //TODO: Handle this with configuration somehow
             .filterNot { it.accountName == "CHASE AUTO ACCOUNT" } //TODO: Handle this with configuration somehow
+            .filter { it.date.isAfter(LocalDate.now().withMonth(1).withDayOfMonth(1)) }
             .sortedByDescending { it.date }
+            .toList()
         transactionRepository.clearAllExistingMintTransactions()
         val headerRow = MintFileParser.HEADER_LINE_VALUES.toMutableList()
         transactionRepository.writeHeaderAndAllTransactions(TabName.MINT_TRANSACTIONS, headerRow, sortedMintTransactions)
@@ -60,8 +63,8 @@ class TransactionService(
     }
 
     fun create(cmd: CreateTransactionCmd) {
-        requireNotNull(budgetCategoryService.readAll().firstOrNull { it.id == cmd.transactionTypeId },
-                {"Please provide valid budget category Id"})
+        requireNotNull(budgetCategoryService.readAll().firstOrNull { it.id == cmd.transactionTypeId }
+        ) { "Please provide valid budget category Id" }
         val txDate = cmd.transactionDateString?.let { LocalDate.parse(cmd.transactionDateString) }
                 ?: dateTimeService.now()
         val authAmt: Int = transformStringToIntegerForAmounts(cmd.authorizedAmount)
