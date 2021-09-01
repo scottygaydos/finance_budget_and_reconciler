@@ -158,7 +158,8 @@ class BudgetService(
         val paychecksPreviousMonth: List<PaycheckDTO> = allTransactions
                 .filter { YearMonth.from(it.date) == YearMonth.of(budgetYearLocal, budgetMonthLocal).minusMonths(1) }
                 .filter { it.creditAccountId == 1 } //TODO: Fix this to look up checking acct
-                .filter { it.bankPayee.toLowerCase().contains("onprem") || it.description.toLowerCase().contains("onprem") }
+                .filter { it.bankPayee.toLowerCase().contains("h-e-b") || it.description.toLowerCase().contains("h-e-b") ||
+                        it.bankPayee.toLowerCase().contains("onprem") || it.description.toLowerCase().contains("onprem")}
                 .map { PaycheckDTO(it.date, it.settledAmount) }
 
         val totalBudget = budgetCategoryReports.map { it.budgetAmount }.sum()
