@@ -39,6 +39,7 @@ class RemainingMintTransactionsService(
 
         remainingMintTransactions
             .filter { it.date.isAfter(LocalDate.of(2021, 1, 31)) } //TODO: Should I remove this and back populate?
+            .filter { it.date.isAfter(LocalDate.now().withDayOfMonth(1).minusMonths(1))} //TODO: Should I remove this and back populate?
             .forEach { mintTx ->
             val mintAccount = findAccountByMintAccountName(accounts, mintTx)
             val (creditAccount, debitAccount) =

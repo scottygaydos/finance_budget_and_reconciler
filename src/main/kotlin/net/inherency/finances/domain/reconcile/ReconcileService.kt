@@ -66,7 +66,7 @@ class ReconcileService(
         val accumulator = categorizedTransactions.map { catTx ->
             val matchingMintTx = popMatchingMintTxForCategorizedTx(accounts, catTx, mintTransactionsUnmatchedAtEnd)
             Pair(catTx, matchingMintTx)
-        }.foldRight(ReconcileResultAccumulator(), { pair, acc ->
+        }.foldRight(ReconcileResultAccumulator()) { pair, acc ->
             val categorizedTx = pair.first
             val mintTx = pair.second
             if (mintTx != null) {
@@ -75,7 +75,7 @@ class ReconcileService(
                 acc.unreconciledCategorizedTransactions.add(categorizedTx)
             }
             acc
-        })
+        }
         accumulator.unreconciledMintTransactions = mintTransactionsUnmatchedAtEnd
         return accumulator
     }
