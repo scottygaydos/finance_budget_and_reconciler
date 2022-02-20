@@ -4,6 +4,7 @@ import net.inherency.finances.CommandLineService
 import net.inherency.finances.domain.account.Account
 import net.inherency.finances.domain.account.AccountService
 import net.inherency.finances.domain.account.AccountService.Companion.GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME
+import net.inherency.finances.domain.bill.BillData
 import net.inherency.finances.domain.bill.BillService
 import net.inherency.finances.domain.budget.category.BudgetCategoryData
 import net.inherency.finances.domain.budget.category.BudgetCategoryService
@@ -71,6 +72,7 @@ class RemainingMintTransactionsService(
         log.info("Creating transaction based on rule...")
         log.info("Transaction: $mintTx")
         log.info("Rule: $matchingRule")
+        log.info("")
         createCategorizedTransaction(creditAccountForRule, debitAccountForRule, mintTx, matchingRule.category)
     }
 
@@ -78,27 +80,38 @@ class RemainingMintTransactionsService(
             creditAccount: Account, debitAccount: Account, mintTransaction: MintTransaction,
             category: BudgetCategoryData) {
 
-        val creditAccountToUse = if (isBill(category)) {
-            val billOptions = billService.findAllBills()
-                .filter { it.budgetCategoryId == category.id }
-            val billData = if (billOptions.size == 1) {
-                billOptions.first()
-            } else {
-                log.info("This is a bill. Please type the account id number to use:")
-                billOptions.forEach {
-                    log.info(it.toString())
+        try {
+            val creditAccountToUse = if (isBill(category)) {
+                val billOptions = billService.findAllBills()
+                    .filter { it.budgetCategoryId == category.id }
+                val billData = if (billOptions.size == 1) {
+                    billOptions.first()
+                } else {
+                    log.info("This is a bill. Please type the account id number to use:")
+                    val billsByChoiceIndex = logAndMapBillData(billOptions)
+                    val billAccountSelection = commandLineService.readFromCommandLine()
+                    billsByChoiceIndex[billAccountSelection.toInt()]
                 }
-                val billAccountSelection = commandLineService.readFromCommandLine()
-                billOptions.first { it.accountId == billAccountSelection.toInt() }
-
+                accountService.readAll().first { it.id == billData?.accountId }
+            } else {
+                creditAccount
             }
-            accountService.readAll().first { it.id == billData.accountId }
-        } else {
-            creditAccount
-        }
-        transactionService.createCategorizedTransactionFromMintTransaction(
+            transactionService.createCategorizedTransactionFromMintTransaction(
                 creditAccountToUse, debitAccount, mintTransaction, category)
+        } catch (e: Exception) {
+            log.error("Invalid selection. Please try again.", e)
+            createCategorizedTransaction(creditAccount, debitAccount, mintTransaction, category)
+        }
+    }
 
+    private fun logAndMapBillData(billOptions: List<BillData>): Map<Int, BillData> {
+        val counter = 1
+        val resultMap = mutableMapOf<Int, BillData>()
+        billOptions.forEach {
+            log.info("$counter = $it.name (${it.description})")
+            resultMap[counter] = it
+        }
+        return resultMap
     }
 
     private fun isBill(category: BudgetCategoryData): Boolean {
