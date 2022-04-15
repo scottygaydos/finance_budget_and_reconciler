@@ -7,8 +7,8 @@ import com.google.api.services.sheets.v4.Sheets
 import com.google.api.services.sheets.v4.SheetsScopes
 import com.google.api.services.sheets.v4.model.ClearValuesRequest
 import com.google.api.services.sheets.v4.model.ValueRange
-import net.inherency.finances.config.ConfigurationService
 import net.inherency.finances.config.ConfigKey
+import net.inherency.finances.config.ConfigurationService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

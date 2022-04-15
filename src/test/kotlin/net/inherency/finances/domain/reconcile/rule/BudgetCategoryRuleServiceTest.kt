@@ -10,6 +10,7 @@ import net.inherency.finances.domain.budget.category.BudgetCategoryService
 import net.inherency.finances.domain.transaction.CreditOrDebit
 import net.inherency.finances.domain.transaction.MintTransaction
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -38,8 +39,8 @@ class BudgetCategoryRuleServiceTest {
                 BudgetCategoryRuleData(description, ruleCreditAccountId, null, ruleBudgetCategoryId)
         ))
         whenever(accountService.readAll()).thenReturn(listOf(
-                Account(ruleCreditAccountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
-                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+                Account(ruleCreditAccountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE),
+                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
                 BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
@@ -67,8 +68,8 @@ class BudgetCategoryRuleServiceTest {
             BudgetCategoryRuleData(description, null, ruleDebitAccountId, ruleBudgetCategoryId)
         ))
         whenever(accountService.readAll()).thenReturn(listOf(
-            Account(1, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
-            Account(ruleDebitAccountId, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+            Account(1, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE),
+            Account(ruleDebitAccountId, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
             BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Transaction that does not affect a budget", ruleBudgetCategoryId)
@@ -96,8 +97,8 @@ class BudgetCategoryRuleServiceTest {
             BudgetCategoryRuleData(description, ruleCreditAccountId, null, ruleBudgetCategoryId)
         ))
         whenever(accountService.readAll()).thenReturn(listOf(
-            Account(1, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
-            Account(ruleCreditAccountId, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+            Account(1, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE),
+            Account(ruleCreditAccountId, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
             BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Transaction that does not affect a budget", ruleBudgetCategoryId)
@@ -125,8 +126,8 @@ class BudgetCategoryRuleServiceTest {
                 BudgetCategoryRuleData(originalDescription, ruleCreditAccountId, null, ruleBudgetCategoryId)
         ))
         whenever(accountService.readAll()).thenReturn(listOf(
-                Account(ruleCreditAccountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
-                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+                Account(ruleCreditAccountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE),
+                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
                 BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
@@ -154,8 +155,8 @@ class BudgetCategoryRuleServiceTest {
                 BudgetCategoryRuleData("different description", ruleCreditAccountId, null, ruleBudgetCategoryId)
         ))
         whenever(accountService.readAll()).thenReturn(listOf(
-                Account(ruleCreditAccountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
-                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+                Account(ruleCreditAccountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE),
+                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
                 BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
@@ -183,8 +184,8 @@ class BudgetCategoryRuleServiceTest {
                 BudgetCategoryRuleData(originalDescription, null, null, ruleBudgetCategoryId)
         ))
         whenever(accountService.readAll()).thenReturn(listOf(
-                Account(accountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
-                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+                Account(accountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE),
+                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
                 BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
@@ -213,8 +214,8 @@ class BudgetCategoryRuleServiceTest {
                 BudgetCategoryRuleData(originalDescription, ruleCreditAccountId, ruleDebitAccountId, ruleBudgetCategoryId)
         ))
         whenever(accountService.readAll()).thenReturn(listOf(
-                Account(ruleCreditAccountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
-                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+                Account(ruleCreditAccountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE),
+                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
                 BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
@@ -242,8 +243,8 @@ class BudgetCategoryRuleServiceTest {
                 BudgetCategoryRuleData(originalDescription, ruleCreditAccountId, null, ruleBudgetCategoryId)
         ))
         whenever(accountService.readAll()).thenReturn(listOf(
-                Account(4, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
-                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+                Account(4, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE),
+                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
                 BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
@@ -271,8 +272,8 @@ class BudgetCategoryRuleServiceTest {
                 BudgetCategoryRuleData(originalDescription, null, ruleDebitAccountId, ruleBudgetCategoryId)
         ))
         whenever(accountService.readAll()).thenReturn(listOf(
-                Account(4, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
-                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+                Account(4, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE),
+                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
                 BudgetCategoryData(ruleBudgetCategoryId, categoryName, "Food Category", ruleBudgetCategoryId)
@@ -300,8 +301,8 @@ class BudgetCategoryRuleServiceTest {
                 BudgetCategoryRuleData(originalDescription, ruleCreditAccountId, null, ruleBudgetCategoryId)
         ))
         whenever(accountService.readAll()).thenReturn(listOf(
-                Account(ruleCreditAccountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true),
-                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true)
+                Account(ruleCreditAccountId, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "", "", "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE),
+                Account(1, accountNameInMintTx, "", accountNameInMintTx, "", true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         ))
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(
                 BudgetCategoryData(8, categoryName, "Food Category", ruleBudgetCategoryId)

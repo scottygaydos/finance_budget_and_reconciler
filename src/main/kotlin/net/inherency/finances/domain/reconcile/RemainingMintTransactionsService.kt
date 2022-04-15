@@ -10,6 +10,7 @@ import net.inherency.finances.domain.budget.category.BudgetCategoryData
 import net.inherency.finances.domain.budget.category.BudgetCategoryService
 import net.inherency.finances.domain.reconcile.rule.BudgetCategoryRule
 import net.inherency.finances.domain.reconcile.rule.BudgetCategoryRuleService
+import net.inherency.finances.domain.transaction.CategorizedTransaction
 import net.inherency.finances.domain.transaction.MintTransaction
 import net.inherency.finances.domain.transaction.TransactionService
 import org.slf4j.LoggerFactory
@@ -38,26 +39,41 @@ class RemainingMintTransactionsService(
         val globalExternalAccount = accounts.first { it.name == (GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME) }
         val budgetCategories = budgetCategoryService.readAll()
 
+        val toCategorize = mutableListOf<MintTransaction>()
+        val rowsToAdd = mutableListOf<CategorizedTransaction>()
+
         remainingMintTransactions
             .filter { it.date.isAfter(LocalDate.of(2021, 1, 31)) } //TODO: Should I remove this and back populate?
             .filter { it.date.isAfter(LocalDate.now().withDayOfMonth(1).minusMonths(1))} //TODO: Should I remove this and back populate?
+            .sortedBy { it.date }
             .forEach { mintTx ->
+                val mintAccount = findAccountByMintAccountName(accounts, mintTx)
+                val (creditAccount, debitAccount) =
+                        determineCreditAndDebitAccounts(mintTx, mintAccount, globalExternalAccount)
+                val matchingRule = budgetCategoryRuleService.findMatchingRuleForAutoCategorization(mintTx)
+                if (matchingRule != null) {
+                    rowsToAdd.add(createTransactionFromRule(matchingRule, creditAccount, debitAccount, mintTx))
+                } else {
+                    toCategorize.add(mintTx)
+                }
+        }
+
+        log.info("Beginning manual transaction review...")
+        toCategorize.forEach { mintTx ->
             val mintAccount = findAccountByMintAccountName(accounts, mintTx)
             val (creditAccount, debitAccount) =
-                    determineCreditAndDebitAccounts(mintTx, mintAccount, globalExternalAccount)
-            val matchingRule = budgetCategoryRuleService.findMatchingRuleForAutoCategorization(mintTx)
-            if (matchingRule != null) {
-                createTransactionFromRule(matchingRule, creditAccount, debitAccount, mintTx)
-            } else {
-                val doCategorize = askToCategorizeTransaction(mintTx)
-                if (doCategorize) {
-                    val inputOption = selectInputOption(budgetCategories)
-                    createCategorizedTransaction(creditAccount, debitAccount, mintTx, inputOption)
-                }
+                determineCreditAndDebitAccounts(mintTx, mintAccount, globalExternalAccount)
+            val doCategorize = askToCategorizeTransaction(mintTx)
+            if (doCategorize) {
+                val inputOption = selectInputOption(budgetCategories)
+                rowsToAdd.add(createCategorizedTransaction(creditAccount, debitAccount, mintTx, inputOption, false))
             }
         }
 
-        log.info("*** Reconciliation complete ***")
+        rowsToAdd.sortBy { it.date }
+        log.info("Inserting ${rowsToAdd.size} CATEGORIZED_TRANSACTION rows")
+        transactionService.createBatch(rowsToAdd)
+        log.info("*** Remaining Mint Transaction service complete ***")
     }
 
     private fun askToCategorizeTransaction(mintTx: MintTransaction): Boolean {
@@ -66,22 +82,23 @@ class RemainingMintTransactionsService(
         return commandLineService.readConfirmation()
     }
 
-    private fun createTransactionFromRule(matchingRule: BudgetCategoryRule, creditAccount: Account, debitAccount: Account, mintTx: MintTransaction) {
+    private fun createTransactionFromRule(matchingRule: BudgetCategoryRule, creditAccount: Account, debitAccount: Account,
+                                          mintTx: MintTransaction): CategorizedTransaction {
         val creditAccountForRule = matchingRule.creditAccount ?: creditAccount
         val debitAccountForRule = matchingRule.debitAccount ?: debitAccount
         log.info("Creating transaction based on rule...")
         log.info("Transaction: $mintTx")
         log.info("Rule: $matchingRule")
         log.info("")
-        createCategorizedTransaction(creditAccountForRule, debitAccountForRule, mintTx, matchingRule.category)
+        return createCategorizedTransaction(creditAccountForRule, debitAccountForRule, mintTx, matchingRule.category, true)
     }
 
     private fun createCategorizedTransaction(
             creditAccount: Account, debitAccount: Account, mintTransaction: MintTransaction,
-            category: BudgetCategoryData) {
+            category: BudgetCategoryData, usedRule: Boolean): CategorizedTransaction {
 
         try {
-            val creditAccountToUse = if (isBill(category)) {
+            val creditAccountToUse = if (usedRule && isManualBillTransaction(category, usedRule) && !isCreditCardPayment(mintTransaction)) {
                 val billOptions = billService.findAllBills()
                     .filter { it.budgetCategoryId == category.id }
                 val billData = if (billOptions.size == 1) {
@@ -96,25 +113,33 @@ class RemainingMintTransactionsService(
             } else {
                 creditAccount
             }
-            transactionService.createCategorizedTransactionFromMintTransaction(
+            return transactionService.createCategorizedTransactionFromMintTransaction(
                 creditAccountToUse, debitAccount, mintTransaction, category)
         } catch (e: Exception) {
             log.error("Invalid selection. Please try again.", e)
-            createCategorizedTransaction(creditAccount, debitAccount, mintTransaction, category)
+            return createCategorizedTransaction(creditAccount, debitAccount, mintTransaction, category, usedRule)
         }
     }
 
+    private fun isCreditCardPayment(mintTransaction: MintTransaction) =
+        mintTransaction.category.contains("Credit Card Payment")
+
     private fun logAndMapBillData(billOptions: List<BillData>): Map<Int, BillData> {
-        val counter = 1
+        var counter = 1
         val resultMap = mutableMapOf<Int, BillData>()
         billOptions.forEach {
-            log.info("$counter = $it.name (${it.description})")
+            log.info("$counter = ${it.name} (${it.description})")
             resultMap[counter] = it
+            counter++
         }
         return resultMap
     }
 
-    private fun isBill(category: BudgetCategoryData): Boolean {
+    private fun isManualBillTransaction(category: BudgetCategoryData, usedRule: Boolean): Boolean {
+        if (usedRule) {
+            return false
+        }
+
         return when(category.name) {
             "Utilities" -> true
             "Mortgage" -> true

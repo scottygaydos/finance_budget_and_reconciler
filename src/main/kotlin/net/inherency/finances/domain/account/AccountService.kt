@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service
 class AccountService(private val accountRepository: AccountRepository) {
 
     companion object {
-        const val GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME = "Global External Account"
+        const val GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME = "Global External"
     }
+
+    private val allAccounts = mutableListOf<Account>()
 
     fun readAllCreditableAccounts(): List<AccountDTO> {
         return readAllAccountsMeetingCondition { it.canManuallyCredit }
@@ -25,9 +27,17 @@ class AccountService(private val accountRepository: AccountRepository) {
     }
 
     fun readAll(): List<Account> {
-        val accounts = accountRepository.readAll()
-        validateAccounts(accounts)
-        return accounts
+        if (allAccounts.isEmpty()) {
+            val accounts = accountRepository.readAll()
+            validateAccounts(accounts)
+            allAccounts.addAll(accounts)
+        }
+
+        return allAccounts
+    }
+
+    fun findByName(name: String): Account {
+        return readAll().first { it.name == name }
     }
 
     private fun validateAccounts(accounts: List<Account>) {

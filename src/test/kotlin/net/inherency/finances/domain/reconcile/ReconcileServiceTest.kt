@@ -7,6 +7,7 @@ import net.inherency.finances.domain.account.AccountService
 import net.inherency.finances.domain.transaction.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
@@ -64,7 +65,8 @@ class ReconcileServiceTest {
         val accountId = 1
         whenever(accountService.readAll()).thenReturn(
                 listOf(Account(accountId, accountName, accountName, accountName, accountName, canManuallyCredit = true,
-                        canManuallyDebit = true)))
+                        canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE
+                )))
 
         //AND: A categorized transaction
         val categorizedTx = CategorizedTransaction(

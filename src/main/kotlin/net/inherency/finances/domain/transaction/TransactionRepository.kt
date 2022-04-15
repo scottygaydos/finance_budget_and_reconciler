@@ -3,6 +3,7 @@ package net.inherency.finances.domain.transaction
 import net.inherency.finances.external.google.TabName
 
 interface TransactionRepository {
+    fun addCategorizedTransactionRows(categorizedTransactionList: List<CategorizedTransaction>)
     fun addCategorizedTransactionRow(categorizedTransaction: CategorizedTransaction)
     fun listAllMintTransactions(): List<MintTransaction>
     fun listAllCategorizedTransactions(): List<CategorizedTransaction>

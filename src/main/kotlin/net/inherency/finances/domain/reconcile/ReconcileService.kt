@@ -14,7 +14,7 @@ class ReconcileService(
         private val accountService: AccountService) {
 
     companion object {
-        const val DAYS_TO_TEST_FORWARD_AND_BACKWARD = 5L
+        const val DAYS_TO_TEST_FORWARD_AND_BACKWARD = 3L
 
         data class ReconcileResult (
                 val reconciledTransactions: Map<CategorizedTransaction, MintTransaction>,
@@ -33,6 +33,9 @@ class ReconcileService(
         val allMintTransactions = transactionService.updateMintTransactions(doDownloadFile)
         val mintTxsToReconcile = allMintTransactions
                 .filterNot { mintTx -> reconciledTransactions.map { it.mintId }.contains(mintTx.getIdAsString()) }
+                .filterNot { mintTx -> mintTx.accountName == "PayPal Account" }
+                .filterNot { mintTx -> mintTx.accountName == "Fixed Rate Mortgage" }
+                .filterNot { mintTx -> mintTx.accountName == "HEALTH SAVINGS ACCOUNT" }
 
         log.info("Reading all existing categorized transactions that are reconcilable...")
         val allCategorizedTransactions = transactionService.listAllCategorizedTransactions()

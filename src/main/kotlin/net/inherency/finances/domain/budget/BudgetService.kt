@@ -62,8 +62,8 @@ class BudgetService(
                     UUID.randomUUID(),
                     existingYearMonth,
                     budgetCategory.id,
-                    "Move Budget To Next Month",
-                    "Move Budget To Next Month",
+                    "Move Budget To Next Month: ${budgetCategory.name}",
+                    "Move Budget To Next Month: ${budgetCategory.name}",
                     2, //ToDo: Add feature to look this up; this is 'global external debit account'
                     1, //ToDo: Use ^ feature; this is 'scotty checking'
                     amountToMove,
@@ -129,6 +129,10 @@ class BudgetService(
         }
 
         return Pair(cmd.year, Month.of(cmd.month + 1))
+    }
+
+    fun generateMonthlyBudgetReport(): BudgetReportDTO {
+        return generateMonthlyBudgetReport(null, null)
     }
 
     fun generateMonthlyBudgetReport(budgetMonth: Int?, budgetYear: Int?): BudgetReportDTO {

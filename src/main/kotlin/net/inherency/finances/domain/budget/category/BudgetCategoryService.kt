@@ -7,16 +7,30 @@ import org.springframework.stereotype.Service
 @Service
 class BudgetCategoryService(private val budgetCategoryRepository: BudgetCategoryRepository) {
 
+    private val allCategories = mutableListOf<BudgetCategoryData>()
+
     fun reportAll(): List<BudgetCategoryDTO> {
         return readAll().map {
             BudgetCategoryDTO(it.id, it.name)
         }
     }
 
+    fun findById(id: Int): BudgetCategoryData {
+        return readAll().first { it.id == id }
+    }
+
+    fun findByName(name: String): BudgetCategoryData {
+        return readAll().first { it.name == name }
+    }
+
     fun readAll(): List<BudgetCategoryData> {
-        val categories = budgetCategoryRepository.readAll()
-        validateCategories(categories)
-        return categories
+        if (allCategories.isEmpty()) {
+            val categories = budgetCategoryRepository.readAll()
+            validateCategories(categories)
+            allCategories.addAll(categories)
+        }
+
+        return allCategories
     }
 
     private fun validateCategories(categories: List<BudgetCategoryData>) {

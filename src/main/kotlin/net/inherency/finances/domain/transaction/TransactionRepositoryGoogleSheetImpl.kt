@@ -15,6 +15,11 @@ class TransactionRepositoryGoogleSheetImpl(
     private val mintTransactionFactory: MintTransactionFactory,
     private val categorizedTransactionFactory: CategorizedTransactionFactory): TransactionRepository {
 
+    override fun addCategorizedTransactionRows(categorizedTransactionList: List<CategorizedTransaction>) {
+        val rowList = categorizedTransactionList.map { it.toGoogleSheetRowList() }
+        googleSheetClient.writeAllValuesToTab(TabName.CATEGORIZED_TRANSACTIONS, rowList)
+    }
+
     override fun addCategorizedTransactionRow(categorizedTransaction: CategorizedTransaction) {
         val singleRowList = listOf(categorizedTransaction.toGoogleSheetRowList())
         googleSheetClient.writeAllValuesToTab(TabName.CATEGORIZED_TRANSACTIONS, singleRowList)

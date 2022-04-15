@@ -46,8 +46,8 @@ class TransactionService(
         return transactionRepository.listAllReconciledTransactions()
     }
 
-    fun createCategorizedTransactionFromMintTransaction(creditAccount: Account, debitAccount: Account, mintTransaction: MintTransaction, category: BudgetCategoryData) {
-        val categorizedTransaction = CategorizedTransaction(
+    fun createCategorizedTransactionFromMintTransaction(creditAccount: Account, debitAccount: Account, mintTransaction: MintTransaction, category: BudgetCategoryData): CategorizedTransaction {
+        return CategorizedTransaction(
                 UUID.randomUUID(),
                 mintTransaction.date,
                 category.id,
@@ -59,7 +59,6 @@ class TransactionService(
                 mintTransaction.amount,
                 true
         )
-        transactionRepository.addCategorizedTransactionRow(categorizedTransaction)
     }
 
     fun create(cmd: CreateTransactionCmd) {
@@ -89,6 +88,10 @@ class TransactionService(
         transactionRepository.addCategorizedTransactionRow(categorizedTransaction)
     }
 
+    fun createBatch(list: List<CategorizedTransaction>) {
+        transactionRepository.addCategorizedTransactionRows(list)
+    }
+
     fun reportAllCategorizedTransactionsAfter(cutoffDate: LocalDate = dateTimeService.now().minusDays(91)) :
             List<TransactionDTO> {
         val categories = budgetCategoryService.readAll()
@@ -109,12 +112,7 @@ class TransactionService(
                     creditAccount.name,
                     debitAccount.name,
                     "-", //TODO: Remove this?  Is it useful?
-                    //TODO : Fix this by configuring accounts
-                    if ((creditAccount.name+debitAccount.name).toLowerCase().contains("savor")) {
-                        50
-                    } else {
-                        100
-                    }
+                    creditAccount.budgetMultiplier.min(debitAccount.budgetMultiplier).multiply(BigDecimal(100)).intValueExact()
             )
         }.sortedByDescending { it.transaction_date }
     }

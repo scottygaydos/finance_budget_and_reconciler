@@ -25,6 +25,7 @@
         <wiremock.version>2.27.1</wiremock.version>
         <kotlin.mockito.version>2.2.0</kotlin.mockito.version>
         <config.test.env.vars>1.19.0</config.test.env.vars>
+        <fuzzystring.version>1.4.0</fuzzystring.version>
     </properties>
 
     <dependencies>
@@ -32,6 +33,11 @@
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
             <version>${jackson.kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.xdrop</groupId>
+            <artifactId>fuzzywuzzy</artifactId>
+            <version>${fuzzystring.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.doyaaaaaken</groupId>

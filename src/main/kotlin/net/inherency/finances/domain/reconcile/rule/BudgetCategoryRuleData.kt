@@ -13,10 +13,12 @@ data class BudgetCategoryRuleData (
 data class BudgetCategoryRule (
         val category: BudgetCategoryData,
         val debitAccount: Account?,
-        val creditAccount: Account?) {
+        val creditAccount: Account?,
+        val descriptionToMatch: String) {
                 override fun toString(): String {
                         val newLine = System.lineSeparator()
                         return "BudgetCategoryRule" + newLine +
+                                "   Description To Match=${descriptionToMatch}" + newLine +
                                 "   Category=${category.name}" + newLine +
                                 "   Credit=${creditAccount?.name}" + newLine +
                                 "   Debit=${debitAccount?.name}"

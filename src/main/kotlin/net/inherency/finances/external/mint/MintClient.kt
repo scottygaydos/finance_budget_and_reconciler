@@ -63,9 +63,7 @@ class MintClient(private val configs: ConfigurationService,
 
     private fun reportDownloadedTransactionFile(): List<MintTransaction> {
         val downloadFilePath = getDownloadFilePath()
-        val transactions = transformFileToMintTransactions(downloadFilePath)
-        deleteDownloadFile(downloadFilePath)
-        return transactions
+        return transformFileToMintTransactions(downloadFilePath)
     }
 
     private fun closeChrome(driver: ChromeDriver) {
@@ -79,8 +77,10 @@ class MintClient(private val configs: ConfigurationService,
         return path
     }
 
-    private fun deleteDownloadFile(downloadFile: String) {
+    //TODO: Move this to its own service.
+    fun deleteDownloadFile() {
         try {
+            val downloadFile = getDownloadFilePath()
             Files.delete(Path.of(downloadFile))
             log.info("Deleted file: {}", downloadFile)
         } catch (e: Exception) {

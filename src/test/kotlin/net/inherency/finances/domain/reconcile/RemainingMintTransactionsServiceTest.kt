@@ -15,6 +15,7 @@ import net.inherency.finances.domain.transaction.CreditOrDebit
 import net.inherency.finances.domain.transaction.MintTransaction
 import net.inherency.finances.domain.transaction.TransactionService
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 
 class RemainingMintTransactionsServiceTest {
@@ -47,10 +48,11 @@ class RemainingMintTransactionsServiceTest {
         //GIVEN:
         //A matching account to debit and the global external account to credit can be found
         val checkingAccount = Account(1, "Checking", "Checking Account", "Checking", "",
-                canManuallyCredit = true, canManuallyDebit = true)
+                canManuallyCredit = true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE
+        )
         val globalExternalAccountToDebit = Account(2, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME,
                 "Generic account to represent other parties", GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "",
-                canManuallyCredit = true, canManuallyDebit = true)
+                canManuallyCredit = true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         whenever(accountService.readAll()).thenReturn(listOf(checkingAccount, globalExternalAccountToDebit))
 
         //When prompted, user chooses "Spending" by inputting "y" to confirm desire to categorize, then "s"
@@ -78,10 +80,10 @@ class RemainingMintTransactionsServiceTest {
         //GIVEN:
         //A matching account to debit and the global external account to credit can be found
         val creditCardAccount = Account(1, "Credit Card x1111", "Personal Credit Card", "Credit Card (1111)", "",
-                canManuallyCredit = true, canManuallyDebit = true)
+                canManuallyCredit = true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         val globalExternalAccountToCredit = Account(2, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME,
                 "Generic account to represent other parties", GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "",
-                canManuallyCredit = true, canManuallyDebit = true)
+                canManuallyCredit = true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         whenever(accountService.readAll()).thenReturn(listOf(creditCardAccount, globalExternalAccountToCredit))
 
         //When prompted, user chooses "Spending" by inputting affirmative to confirm desire to categorize,
@@ -110,10 +112,10 @@ class RemainingMintTransactionsServiceTest {
         //GIVEN:
         //A matching account to debit and the global external account to credit can be found
         val creditCardAccount = Account(1, "Credit Card x1111", "Personal Credit Card", "Credit Card (1111)", "",
-                canManuallyCredit = true, canManuallyDebit = true)
+                canManuallyCredit = true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         val globalExternalAccountToCredit = Account(2, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME,
                 "Generic account to represent other parties", GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "",
-                canManuallyCredit = true, canManuallyDebit = true)
+                canManuallyCredit = true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         whenever(accountService.readAll()).thenReturn(listOf(creditCardAccount, globalExternalAccountToCredit))
 
         //When prompted, user chooses not to categorize the mint transaction
@@ -140,10 +142,10 @@ class RemainingMintTransactionsServiceTest {
         //GIVEN:
         //A matching account to debit and the global external account to credit can be found
         val creditCardAccount = Account(1, "Credit Card x1111", "Personal Credit Card", "Credit Card (1111)", "",
-                canManuallyCredit = true, canManuallyDebit = true)
+                canManuallyCredit = true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         val globalExternalAccountToCredit = Account(2, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME,
                 "Generic account to represent other parties", GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "",
-                canManuallyCredit = true, canManuallyDebit = true)
+                canManuallyCredit = true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         whenever(accountService.readAll()).thenReturn(listOf(creditCardAccount, globalExternalAccountToCredit))
 
         //When prompted, user "n" for no for the first transaction, the affirmative for the second transaction.
@@ -176,17 +178,17 @@ class RemainingMintTransactionsServiceTest {
         //GIVEN:
         //A matching account to debit and the global external account to credit can be found
         val checkingAccount = Account(1, "Checking", "Checking Account", "Checking", "",
-                canManuallyCredit = true, canManuallyDebit = true)
+                canManuallyCredit = true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         val globalExternalAccount = Account(2, GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME,
                 "Generic account to represent other parties", GLOBAL_EXTERNAL_DEBIT_ACCOUNT_NAME, "",
-                canManuallyCredit = true, canManuallyDebit = true)
+                canManuallyCredit = true, canManuallyDebit = true, budgetMultiplier = BigDecimal.ONE)
         whenever(accountService.readAll()).thenReturn(listOf(checkingAccount, globalExternalAccount))
 
         //The system finds a matching rule for the transaction and category
         val spendingCategory = BudgetCategoryData(1, "Spending", "Spending Category", 1)
         whenever(budgetCategoryService.readAll()).thenReturn(listOf(spendingCategory))
         whenever(budgetCategoryRuleService.findMatchingRuleForAutoCategorization(any())).thenReturn(BudgetCategoryRule(
-                spendingCategory, checkingAccount, globalExternalAccount))
+                spendingCategory, checkingAccount, globalExternalAccount, "Spending Category"))
 
         //One remaining mint transaction
         val remainingMintTransaction = MintTransaction(LocalDate.of(2020, 8, 4), "Refund", "Purchase Refund", 1200,

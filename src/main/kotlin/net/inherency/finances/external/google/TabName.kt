@@ -9,5 +9,9 @@ enum class TabName {
     BUDGETS,
     CATEGORIZED_TRANSACTIONS,
     MINT_TRANSACTIONS,
-    RECONCILED_TRANSACTIONS
+    RECONCILED_TRANSACTIONS,
+    //reports below
+    BudgetReport,
+    TransactionsReport,
+    BillsReport
 }

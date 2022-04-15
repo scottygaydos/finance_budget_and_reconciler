@@ -10,8 +10,13 @@ import java.time.LocalDate
 @Service
 class BillService(private val billRepository: BillRepository, private val transactionService: TransactionService) {
 
+    private val allBills = mutableListOf<BillData>()
+
     fun findAllBills(): List<BillData> {
-        return billRepository.readAll()
+        if (allBills.isEmpty()) {
+            allBills.addAll(billRepository.readAll())
+        }
+        return allBills
     }
 
     fun findAllBillsReportableViaUI(): BillReportDTO {

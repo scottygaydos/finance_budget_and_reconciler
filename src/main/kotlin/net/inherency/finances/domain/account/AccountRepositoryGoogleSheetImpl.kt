@@ -26,7 +26,8 @@ class AccountRepositoryGoogleSheetImpl(private val googleSheetClient: GoogleShee
                                 row[3],
                                 row[4],
                                 row[5].toBoolean(),
-                                row[6].toBoolean()
+                                row[6].toBoolean(),
+                                row[7].toBigDecimal()
                         )
                     }
             this.accounts = foundAccounts
