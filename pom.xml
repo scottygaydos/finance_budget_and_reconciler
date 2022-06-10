@@ -14,7 +14,7 @@
         <kotlin.version>1.3.72</kotlin.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <jackson.kotlin.version>2.11.1</jackson.kotlin.version>
-        <google.api.version>1.32.1</google.api.version>
+        <google.api.version>1.33.3</google.api.version>
         <google.api.sheets.version>v4-rev612-1.25.0</google.api.sheets.version>
         <google.api.oauth2.http.version>0.17.1</google.api.oauth2.http.version>
         <slf4jVersion>1.7.16</slf4jVersion>
