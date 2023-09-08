@@ -22,7 +22,7 @@
         <selenium.version>3.9.1</selenium.version>
         <csv.reader.version>0.7.3</csv.reader.version>
         <kotlin.jackson.version>2.11.0</kotlin.jackson.version>
-        <wiremock.version>2.27.1</wiremock.version>
+        <wiremock.version>2.35.1</wiremock.version>
         <kotlin.mockito.version>2.2.0</kotlin.mockito.version>
         <config.test.env.vars>1.19.0</config.test.env.vars>
         <fuzzystring.version>1.4.0</fuzzystring.version>
